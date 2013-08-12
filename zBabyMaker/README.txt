@@ -1,37 +1,27 @@
 make sure all the directories are set. specifically:
 
-./log/
-./jetCorrections/
 ../CORE/
-../Tools/
 ../CORE/MT2/
+../Tools/
+
+The rest should be included with the repository.
+../jetCorrections/
+../looperTools/
 ../jsons/
-../output/[version]/
 
-and any other I might have forgotten.
+Make sure the links in runZLooper.cc are set correctly.
 
-Make sure the links in runZLooper.C are set correctly.
+In order to run a sample, comment the datasets you want to run in makeAllZBabies.sh, e.g. 
 
-In order to run a sample, make sure your code compiles by running
-
-root -b -q "doAllZ.C (\"TChizh_53X_150_1\", \"\", false)"
-
-or whichever file you think is quickest.
-
-then when that is done, comment the datasets you want to run in makeAllZBabies.sh
-
-e.g.
-
-processsample zjets_53X_slim false
-
-
+processsample TChizh_53X_150_1 false $versionnumber
 
 then run the submission script as follows
  
 ./makeAllZBabies.sh
 
-Warning: I've only run 5ish jobs per uaf at a time using this method. Additionally, I stored the output on a simlink to nfs-[]/userdata/cwelke/output/[version]/ so the jobs can run a few at a time without bogging down the home disk, and slowing down.
+Warning: I've only run 5ish jobs per uaf at a time using this method. Additionally, I stored the output on a simlink to nfs-[]/userdata/cwelke/output/.
 
+EXTRA:
 If you want to break the job up a bit, rather than use the command
 
 processsample zjets_53X_slim false
