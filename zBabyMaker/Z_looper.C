@@ -54,7 +54,7 @@
 #endif
 
 #include "Z_looper.h"
-#include "histtools.h"
+#include "../looperTools/histtools.h"
 
 using namespace tas;
 
@@ -507,16 +507,16 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
   set_goodrun_file( jsonfilename );
 
   if( TString(prefix).Contains("sms") || TString(prefix).Contains("T5zz") ){
-    set_vtxreweight_rootfile("vtxreweight_Summer12MC_TChiwz_9p7fb_Zselection.root",true);
+    set_vtxreweight_rootfile("../vtxreweighting/vtxreweight_Summer12MC_TChiwz_9p7fb_Zselection.root",true);
   }
   else if( TString(prefix).Contains("gmsb") ){
-    set_vtxreweight_rootfile("vtxreweight_Summer12MC_GMSB_9p7fb_Zselection.root",true);
+    set_vtxreweight_rootfile("../vtxreweighting/vtxreweight_Summer12MC_GMSB_9p7fb_Zselection.root",true);
   }
   else if( TString(prefix).Contains("massiveb") ){
-    set_vtxreweight_rootfile("vtxreweight_Summer12MC_PUS6.root",true);
+    set_vtxreweight_rootfile("../vtxreweighting/vtxreweight_Summer12MC_PUS6.root",true);
   }
   else{
-    set_vtxreweight_rootfile("vtxreweight_Summer12MC_PUS10_19fb_Zselection.root",true);
+    set_vtxreweight_rootfile("../vtxreweighting/vtxreweight_Summer12MC_PUS10_19fb_Zselection.root",true);
   }
 
   // ofstream* ofile = new ofstream();
@@ -552,11 +552,11 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_AK5PF_L2L3Residual.txt" , dataJEC ));
     // pfUncertaintyFile = Form("jetCorrections/%s_AK5PF_Uncertainty.txt",dataJEC );
 
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L1FastJet_AK5PF.txt"    , dataJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L2Relative_AK5PF.txt"   , dataJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L3Absolute_AK5PF.txt"   , dataJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L2L3Residual_AK5PF.txt" , dataJEC ));
-    pfUncertaintyFile = Form("jetCorrections/%s_Uncertainty_AK5PF.txt",dataJEC );
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L1FastJet_AK5PF.txt"    , dataJEC ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2Relative_AK5PF.txt"   , dataJEC ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L3Absolute_AK5PF.txt"   , dataJEC ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2L3Residual_AK5PF.txt" , dataJEC ));
+    pfUncertaintyFile = Form("../jetCorrections/%s_Uncertainty_AK5PF.txt",dataJEC );
   } 
   else {
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_AK5PF_L1FastJet.txt"  , mcJEC ));
@@ -564,10 +564,10 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_AK5PF_L3Absolute.txt" , mcJEC ));    
     // pfUncertaintyFile = Form("jetCorrections/%s_AK5PF_Uncertainty.txt",mcJEC );
 
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L1FastJet_AK5PF.txt"  , mcJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L2Relative_AK5PF.txt" , mcJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L3Absolute_AK5PF.txt" , mcJEC ));    
-    pfUncertaintyFile = Form("jetCorrections/%s_Uncertainty_AK5PF.txt",mcJEC );
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L1FastJet_AK5PF.txt"  , mcJEC ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2Relative_AK5PF.txt" , mcJEC ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L3Absolute_AK5PF.txt" , mcJEC ));    
+    pfUncertaintyFile = Form("../jetCorrections/%s_Uncertainty_AK5PF.txt",mcJEC );
   }
 
   jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
@@ -577,7 +577,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
   JetCorrectionUncertainty *pfUncertainty   = new JetCorrectionUncertainty( pfUncertaintyFile );
 
   //set stop cross section file
-  gg_xsec_file = TFile::Open("reference_xSec_mg2TeV.root");
+  gg_xsec_file = TFile::Open("../susy_xsecs/reference_xSec_mg2TeV.root");
   
   if( !gg_xsec_file->IsOpen() ){
     cout << "Error, could not open gluino cross section TFile, quitting" << endl;
@@ -591,8 +591,8 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
     exit(0);
   }
 
-  TFile* file_C1N2 = TFile::Open("C1N2_8TeV_finer.root");
-  TFile* file_N1N2 = TFile::Open("N1N2_referencexSec.root");
+  TFile* file_C1N2 = TFile::Open("../susy_xsecs/C1N2_8TeV_finer.root");
+  TFile* file_N1N2 = TFile::Open("../susy_xsecs/N1N2_referencexSec.root");
 
   TH1F*  xsec_C1N2 = (TH1F*) file_C1N2->Get("C1N2_8TeV_NLO");
   TH1F*  xsec_N1N2 = (TH1F*) file_N1N2->Get("N1N2");

@@ -38,7 +38,7 @@ int doAllZ( string fileprefix = "", string ntuplenumber = "", bool isdata = fals
   gROOT->ProcessLine(".L ../Tools/msugraCrossSection.cc+");
   gROOT->ProcessLine(".L ../Tools/bTagEff_BTV.cc+");
 
-  gROOT->ProcessLine(".L histtools.C+");
+  gROOT->ProcessLine(".L ../looperTools/histtools.C+");
   gROOT->ProcessLine(".L Z_looper.C+");
   gROOT->ProcessLine(".L runZLooper.C+");
 
