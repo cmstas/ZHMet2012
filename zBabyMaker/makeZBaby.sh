@@ -18,6 +18,6 @@ if [ "$didMakeDir" == "0" ]; then
 fi
 
 echo "Processing root -b -q \"doAllZ.C (\"$dataset\", \"$percentage\", $isdata)\""
-root -b -q "doAllZ.C (\"$dataset\", \"$percentage\", $isdata)" > log/${versionnumber}/${dataset}.txt 2>&1 &
+root -b -q "runZLooper.cc (\"$dataset\", \"$percentage\", $isdata)" > log/${versionnumber}/${dataset}.txt 2>&1 &
 sleep 5
 }

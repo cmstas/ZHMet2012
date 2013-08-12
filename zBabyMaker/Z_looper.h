@@ -3,7 +3,9 @@
 
 #include "TFile.h"
 #include "TTree.h"
+#include "TChain.h"
 #include "TMath.h"
+#include "TH1.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
@@ -18,7 +20,7 @@ using namespace std;
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 typedef vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > VofP4;
 
-class TChain;
+// class TChain;
 class FactorizedJetCorrector;
 class JetCorrectionUncertainty;
 
