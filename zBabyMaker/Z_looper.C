@@ -542,8 +542,8 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
   //char* mcJEC   = "DESIGN42_V17";
 
   // new 52X
-  char* dataJEC = "GR_R_52_V9";
-  char* mcJEC   = "START52_V9B";
+  string dataJEC = "GR_R_52_V9";
+  string mcJEC   = "START52_V9B";
 
   if ( isData ) {
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_AK5PF_L1FastJet.txt"    , dataJEC ));
@@ -552,11 +552,11 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_AK5PF_L2L3Residual.txt" , dataJEC ));
     // pfUncertaintyFile = Form("jetCorrections/%s_AK5PF_Uncertainty.txt",dataJEC );
 
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L1FastJet_AK5PF.txt"    , dataJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2Relative_AK5PF.txt"   , dataJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L3Absolute_AK5PF.txt"   , dataJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2L3Residual_AK5PF.txt" , dataJEC ));
-    pfUncertaintyFile = Form("../jetCorrections/%s_Uncertainty_AK5PF.txt",dataJEC );
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L1FastJet_AK5PF.txt"    , dataJEC.c_str() ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2Relative_AK5PF.txt"   , dataJEC.c_str() ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L3Absolute_AK5PF.txt"   , dataJEC.c_str() ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2L3Residual_AK5PF.txt" , dataJEC.c_str() ));
+    pfUncertaintyFile = Form("../jetCorrections/%s_Uncertainty_AK5PF.txt",dataJEC.c_str() );
   } 
   else {
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_AK5PF_L1FastJet.txt"  , mcJEC ));
@@ -564,10 +564,10 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_AK5PF_L3Absolute.txt" , mcJEC ));    
     // pfUncertaintyFile = Form("jetCorrections/%s_AK5PF_Uncertainty.txt",mcJEC );
 
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L1FastJet_AK5PF.txt"  , mcJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2Relative_AK5PF.txt" , mcJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L3Absolute_AK5PF.txt" , mcJEC ));    
-    pfUncertaintyFile = Form("../jetCorrections/%s_Uncertainty_AK5PF.txt",mcJEC );
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L1FastJet_AK5PF.txt"  , mcJEC.c_str() ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2Relative_AK5PF.txt" , mcJEC.c_str() ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L3Absolute_AK5PF.txt" , mcJEC.c_str() ));    
+    pfUncertaintyFile = Form("../jetCorrections/%s_Uncertainty_AK5PF.txt",mcJEC.c_str() );
   }
 
   jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
@@ -603,22 +603,22 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 
   //stringstream babyfilename;
   //babyfilename << prefix << "_baby.root";
-  char* tpsuffix = "";
+  string tpsuffix = "";
   if( doTenPercent ) tpsuffix = "_tenPercent";
 
-  char* ptsuffix = "";
+  string ptsuffix = "";
   if( pt2020 ) ptsuffix = "_pt2020";
 
-  char* isosuffix = "";
+  string isosuffix = "";
   if( useOldIsolation ) isosuffix = "_oldIso";
 
-  char* jsonsuffix = "";
+  string jsonsuffix = "";
   if( isData && !useJson ) jsonsuffix = "_nojson";
 
-  cout << "Writing baby ntuple " << Form("../output/%s/%s_baby%s%s%s%s.root" , iter , prefix , tpsuffix , ptsuffix , isosuffix , jsonsuffix ) << endl;
+  cout << "Writing baby ntuple " << Form("../output/%s/%s_baby%s%s%s%s.root" , iter , prefix , tpsuffix.c_str() , ptsuffix.c_str() , isosuffix.c_str() , jsonsuffix.c_str() ) << endl;
 
-  if( doGenSelection ) MakeBabyNtuple( Form("../output/%s/%s_gen_baby%s%s%s.root"  , iter , prefix , tpsuffix , ptsuffix , isosuffix ) );
-  else MakeBabyNtuple( Form("../output/%s/%s_baby%s%s%s%s.root" , iter , prefix , tpsuffix , ptsuffix , isosuffix , jsonsuffix) );
+  if( doGenSelection ) MakeBabyNtuple( Form("../output/%s/%s_gen_baby%s%s%s.root"  , iter , prefix , tpsuffix.c_str() , ptsuffix.c_str() , isosuffix.c_str() ) );
+  else MakeBabyNtuple( Form("../output/%s/%s_baby%s%s%s%s.root" , iter , prefix , tpsuffix.c_str() , ptsuffix.c_str() , isosuffix.c_str() , jsonsuffix.c_str() ) );
 
   TObjArray *listOfFiles = chain->GetListOfFiles();
 
@@ -649,9 +649,6 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
   int   nRecoPassGenPass120 = 0;  //number of events reconstructed in sig window which pass gen
   int   nRecoPassGenFail120 = 0;  //number of events reconstructed in sig window which fail gen
 
-  float sigma      = 1;
-  int   nTotEvents = 1;
-
   const int ncuts = 10;
   int nRecoPass_cut[ncuts];
   for( int icut = 0 ; icut < ncuts ; ++icut )
@@ -663,7 +660,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
   // file loop
   //------------------
 
-  char* thisFile = "blah";
+  string thisFile = "blah";
 
   TIter fileIter(listOfFiles);
   TFile* currentFile = 0;
@@ -676,9 +673,9 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
       continue; //exit(1);                                                                                             
     }
 
-    if( strcmp(thisFile,currentFile->GetTitle()) != 0 ){
-      thisFile = (char*) currentFile->GetTitle();
-      cout << thisFile << endl;
+    if( thisFile != (string)currentFile->GetTitle() ){
+      thisFile = (string) currentFile->GetTitle();
+      cout << "Running on: "<< thisFile << endl;
     }
 
     TTree *tree = (TTree*)f->Get("Events");
@@ -731,8 +728,6 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
       // if( TString(prefix).Contains("wzsms") ){
       // 	if( sparm_values().at(0) > 350 ) continue;
       // }
-
-      if( !isData ) sigma = cms2.evt_xsec_incl();
 
       nTot++;
 
@@ -2664,7 +2659,7 @@ try
 		  mlb2_    = 9999;
 		  drblmin_ = 9999;
 
-		  for( int i = 0 ; i < goodBJets.size() ; ++i ){
+		  for( size_t i = 0 ; i < goodBJets.size() ; ++i ){
 			float m1 = ( *lep1_ + goodBJets.at(i) ).mass();
 			float m2 = ( *lep2_ + goodBJets.at(i) ).mass();
 
@@ -2706,7 +2701,7 @@ try
 		  mlbt1_ = 9999;
 		  mlbt2_ = 9999;
 
-		  for( int i = 0 ; i < goodTightBJets.size() ; ++i ){
+		  for( size_t i = 0 ; i < goodTightBJets.size() ; ++i ){
 			float m1 = ( *lep1_ + goodTightBJets.at(i) ).mass();
 			float m2 = ( *lep2_ + goodTightBJets.at(i) ).mass();
 
@@ -3238,10 +3233,16 @@ void Z_looper::bookHistos(){
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
   rootdir->cd();
 
-  char* pttitle[5]={"all jets","1 jet","2 jet","3 jet","#geq 4 jet"};
+  vector <string> pttitle;
+  pttitle.push_back("all jets");
+  pttitle.push_back("1 jet");
+  pttitle.push_back("2 jet");
+  pttitle.push_back("3 jet");
+  pttitle.push_back("#geq 4 jet");
+  // char* pttitle[5]={"all jets","1 jet","2 jet","3 jet","#geq 4 jet"};
 
   for( int iJ = 0 ; iJ < 5 ; iJ++ ){
-    hptz[iJ] = new TH1F(Form("hptz_%i",iJ),pttitle[iJ],200,0,200);
+    hptz[iJ] = new TH1F(Form("hptz_%i",iJ),pttitle.at(iJ).c_str(),200,0,200);
     hptz[iJ]->GetXaxis()->SetTitle("Z p_{T} (GeV)");
   }
 
@@ -3317,26 +3318,48 @@ void Z_looper::bookHistos(){
   //   metObserved_njets[iJetBin] ->Sumw2();
   //   metPredicted_njets[iJetBin]->Sumw2();
   // }
-  
-  char* leptype[4]   = {"ee", "mm", "em", "all"};
-  char* jetbin[4]    = {"0j", "1j", "geq2j", "allj"};
 
-  char* leptype_title[4]   = {"ee", "#mu#mu", "e#mu", "all leptons"};
-  char* jetbin_title[4]    = {"0 jets", "1 jet", "#geq 2 jets", "all jets"};
+  vector <string> leptype;
+  leptype.push_back("ee");  
+  leptype.push_back("mm");  
+  leptype.push_back("em");  
+  leptype.push_back("all");  
+  // char* leptype[4]   = {"ee", "mm", "em", "all"};
+
+  vector <string> jetbin;
+  jetbin.push_back("0j");  
+  jetbin.push_back("1j");  
+  jetbin.push_back("geq2j");  
+  jetbin.push_back("allj");  
+  // char* jetbin[4]    = {"0j", "1j", "geq2j", "allj"};
+
+  vector <string> leptype_title;
+  leptype_title.push_back("ee");  
+  leptype_title.push_back("#mu#mu");  
+  leptype_title.push_back("e#mu");  
+  leptype_title.push_back("all leptons");  
+  // char* leptype_title[4]   = {"ee", "#mu#mu", "e#mu", "all leptons"};
+
+  vector <string> jetbin_title;
+  jetbin_title.push_back("0 jets");  
+  jetbin_title.push_back("1 jet");  
+  jetbin_title.push_back("#geq 2 jets");  
+  jetbin_title.push_back("all jets");  
+  // char* jetbin_title[4]    = {"0 jets", "1 jet", "#geq 2 jets", "all jets"};
 
   for (int i = 0; i < 4; i++) {
    
-    hdilMass[i] = new TH1F(Form("hdilMass_%s",leptype[i]),  leptype_title[i],   150,0,300);
+    hdilMass[i] = new TH1F(Form("hdilMass_%s",leptype.at(i).c_str()),  leptype_title.at(i).c_str(),   150,0,300);
     hdilMass[i]->GetXaxis()->SetTitle("M(ll) (GeV)");
  
     for (int j = 0; j < 4; j++) {
 
-      char* suffix       = Form("%s_%s",leptype[i],jetbin[j]);
-      char* suffix_title = Form("%s %s",leptype_title[i],jetbin_title[j]);
+      string suffix       = Form("%s_%s", leptype.at(i).c_str(), jetbin.at(j).c_str() );
+      string suffix_title = Form("%s %s", leptype_title.at(i).c_str(), jetbin_title.at(j).c_str() );
     
-      htcmet[i][j]    = new TH1F(Form("htcmet_%s",suffix),    suffix_title, 100,0,100);
-      htcmetNew[i][j] = new TH1F(Form("htcmetNew_%s",suffix), suffix_title, 100,0,100);
-      hpfmet[i][j]    = new TH1F(Form("hpfmet_%s",suffix),    suffix_title, 100,0,100);
+      htcmet[i][j]    = new TH1F(Form("htcmet_%s",suffix.c_str()),    suffix_title.c_str(), 100,0,100);
+      htcmetNew[i][j] = new TH1F(Form("htcmetNew_%s",suffix.c_str()), suffix_title.c_str(), 100,0,100);
+      hpfmet[i][j]    = new TH1F(Form("hpfmet_%s",suffix.c_str()),    suffix_title.c_str(), 100,0,100);
       htcmet[i][j]->GetXaxis()->SetTitle("tcmet (GeV)");
       htcmetNew[i][j]->GetXaxis()->SetTitle("tcmetNew (GeV)");
       hpfmet[i][j]->GetXaxis()->SetTitle("pfmet (GeV)");
