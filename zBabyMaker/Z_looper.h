@@ -58,6 +58,8 @@ class Z_looper
  private:
                 
   std::string iter;
+  TH2F * nsigEvtsHist_;
+
   //ntuple, file
   TFile *babyFile_;
   TTree *babyTree_;
@@ -216,6 +218,10 @@ class Z_looper
   LorentzVector*  genbquark2_; 
   LorentzVector*  genbquark3_; 
   LorentzVector*  genbquark4_; 
+  LorentzVector*  genchi30p4_;
+  LorentzVector*  genchi20p4_;
+  LorentzVector*  genchi10p4_3_;
+  LorentzVector*  genchi10p4_2_;
   LorentzVector*  genz_; 
   LorentzVector*  gent_; 
   LorentzVector*  gentbar_; 

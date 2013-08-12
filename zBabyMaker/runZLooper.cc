@@ -160,6 +160,9 @@ void doAllZ( string prefix, string ntuplenumber, bool isData, float kFactor, str
 	else if( prefix == "TChizh_53X_250_1" ){    
 	  pickSkimIfExists(ch,"/nfs-7/userdata/cwelke/TChizh/CMS2/unmerged/TChizh_250_1.root");
 	}
+	else if( prefix == "TChizh_53X_scan" ){    
+	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/SMS-TChiZH_ZllHbb_2J_mChargino-130to500_mLSP-1to370_TuneZ2star_8TeV-madgraph-tauola/V05-03-31/merged_ntuple_*.root");
+	}
 
 	//all data-----------------------------------------------------------------------------------
 	else if( prefix == "data_53X_2012A" ){    

@@ -55,6 +55,7 @@
 
 #include "Z_looper.h"
 #include "../looperTools/histtools.h"
+#include "../susy_xsecs/getZHGMSBCrossSection.cc"
 
 using namespace tas;
 
@@ -83,6 +84,9 @@ const char* jsonfilename         = "../jsons/Merged_190456-208686_8TeV_PromptReR
 Z_looper::Z_looper( string iteration = "" ) 
 {
   iter                 = iteration;
+  TFile * nsigEvtsHistFile = TFile::Open("../susy_xsecs/myMassDB_TChiZH.root","READ");
+  nsigEvtsHist_ = (TH2F*) nsigEvtsHistFile -> Get("masses") -> Clone("nsigEvtsHist");
+  nsigEvtsHistFile -> Close();  
 };
 
 float dRGenJet ( LorentzVector p4, bool isData, float ptcut = 20.0 ) {
@@ -876,6 +880,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 			size_t size = cms2.genps_id().size(); 
 			for (size_t jj=0; jj<size; jj++) { 
 			  Int_t pid = abs(cms2.genps_id().at(jj));
+
 			  if ( pid == 11 ){
 				ngenels_++; 
 				genleps.push_back(cms2.genps_p4().at(jj));
@@ -904,6 +909,17 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 				nwzpartons_++;
 			  }
 		
+			  if( pid == 1000023 && TString(prefix).Contains("TChizh_53X_scan") ){
+				genchi20p4_ = &cms2.genps_p4().at(jj);
+			  }
+			  if( pid == 1000025 && TString(prefix).Contains("TChizh_53X_scan") ){
+				genchi30p4_ = &cms2.genps_p4().at(jj);
+			  }
+			  if( pid == 1000022 && TString(prefix).Contains("TChizh_53X_scan") ){
+				if( cms2.genps_id_mother().at(jj) == 1000023 ){ genchi10p4_2_ = &cms2.genps_p4().at(jj);	}
+				if( cms2.genps_id_mother().at(jj) == 1000025 ){ genchi10p4_3_ = &cms2.genps_p4().at(jj);	}
+			  }
+
 			  //-------------------------------------------------------------
 			  // loop over gen particles to find b quarks
 			  //-------------------------------------------------------------
@@ -981,7 +997,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	try
 	  {		  
 	  
-		if(!isData && (TString(prefix).Contains("T5zz") || TString(prefix).Contains("sms") || TString(prefix).Contains("gmsb") ) ){
+		if(!isData && (TString(prefix).Contains("T5zz") || TString(prefix).Contains("sms") || TString(prefix).Contains("gmsb") || TString(prefix).Contains("TChizh_53X_scan") ) ){
 
 		  if     (TString(prefix).Contains("T5zz" ) ){
 			mg_ = -1;//sparm_mG();
@@ -990,39 +1006,17 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 			weight_ = lumi * gluinoPairCrossSection(mg_) * (1000./105000.);
 		  }
 
-		  else if( !isData && TString(prefix).Contains("wzsms") ){
+		  else if( TString(prefix).Contains("wzsms") ){
 			mg_ = cms2.sparm_values().at(0);
 			ml_ = cms2.sparm_values().at(1);
 			x_  = -999;
 
 			int   mgbin = xsec_C1N2->FindBin(mg_);
 			float xsec  = xsec_C1N2->GetBinContent(mgbin);
-	  
-			/*
-			  float xsec1 = xsec_C1N2->GetBinContent(mgbin);
-			  float xsec2 = xsec_C1N2->GetBinContent(mgbin+1);
-
-			  int   mgint = (int) mg_;
-			  float xsec  = 0;
-
-			  // temporary fix: have cross sections in 25 GeV steps only....
-			  if( mgint%25 ==  0 ) xsec = xsec1;
-			  if( mgint%25 ==  5 ) xsec = 0.8 * xsec1 + 0.2 * xsec2;
-			  if( mgint%25 == 10 ) xsec = 0.6 * xsec1 + 0.4 * xsec2;
-			  if( mgint%25 == 15 ) xsec = 0.4 * xsec1 + 0.6 * xsec2;
-			  if( mgint%25 == 20 ) xsec = 0.2 * xsec1 + 0.8 * xsec2;
-
-			  // cout << endl;
-			  // cout << "mg    " << mg_      << endl;
-			  // cout << "mgbin " << mgbin    << endl;
-			  // cout << "mod   " << mgint%25 << endl;
-			  // cout << "xsec  " << xsec     << endl;
-			  */
-
 			weight_ = lumi * xsec * (1000.0/100000.);
 		  }
 
-		  else if( !isData && TString(prefix).Contains("zzsms") ){
+		  else if( TString(prefix).Contains("zzsms") ){
 			mg_ = -1;//sparm_mN();
 			ml_ = -1;//sparm_mL();
 			x_  = -999;
@@ -1030,7 +1024,18 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 			weight_ = lumi * xsec_N1N2->GetBinContent(bin) * (1.0/52600.);
 		  }
 
-		  else if( !isData && TString(prefix).Contains("gmsb") ){
+		  else if( TString(prefix).Contains("TChizh_53X_scan") ){
+
+			mg_ = -1;//sparm_mN();
+			ml_ = -1;//sparm_mL();
+			mg_     = cms2.sparm_values().at(0);
+			ml_     = cms2.sparm_values().at(1);
+			weight_ = 0.5 * lumi * getZHGMSBCrossSection( mg_ ) * (1000.0) / nsigEvtsHist_ -> GetBinContent( nsigEvtsHist_ -> FindBin( mg_, ml_ ) ); // /nevts);
+			x_  = -999;
+
+		  }
+
+		  else if( TString(prefix).Contains("gmsb") ){
 
 			mg_     = cms2.sparm_values().at(0);
 			weight_ = lumi * getGMSBCrossSection( mg_ ) * (1000.0 / 300000.0);
@@ -3166,6 +3171,10 @@ void Z_looper::InitBabyNtuple (){
   genbquark2_	= 0;
   genbquark3_  	= 0;
   genbquark4_  	= 0;
+  genchi30p4_	= 0;
+  genchi20p4_	= 0;
+  genchi10p4_3_  	= 0;
+  genchi10p4_2_  	= 0;
   lep1_		= 0;
   lep2_		= 0;
   pflep1_	= 0;
@@ -3734,6 +3743,12 @@ void Z_looper::MakeBabyNtuple (const char* babyFileName)
   babyTree_->Branch("bjet2"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &bjet2_	);
   babyTree_->Branch("bjet3"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &bjet3_	);
   babyTree_->Branch("bjet4"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &bjet4_	);
+
+  babyTree_->Branch("genchi30p4"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genchi30p4_	);
+  babyTree_->Branch("genchi20p4"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genchi20p4_	);
+  babyTree_->Branch("genchi10p4_3"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genchi10p4_3_	);
+  babyTree_->Branch("genchi10p4_2"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genchi10p4_2_	);
+
   babyTree_->Branch("genbquark1"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genbquark1_	);
   babyTree_->Branch("genbquark2"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genbquark2_	);
   babyTree_->Branch("genbquark3"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genbquark3_	);
