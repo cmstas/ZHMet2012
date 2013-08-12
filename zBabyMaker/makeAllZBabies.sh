@@ -2,7 +2,13 @@
 
 . makeZBaby.sh
 
-versionnumber="V00-02-19"
+versionnumber="V00-02-20"
+
+make -j5
+if [ ! "$?" -eq "0" ]; then
+	echo "Did not Compile, Exiting"
+	exit
+fi
 
 # processsample zjetsmc_ee false $versionnumber
 # processsample zjetsmc_mm false $versionnumber
@@ -25,9 +31,9 @@ versionnumber="V00-02-19"
 # processsample ttbar_mgsl_53X_slim false $versionnumber
 # processsample ttbar_mghad_53X_slim false $versionnumber
 
-# processsample TChizh_53X_150_1 false $versionnumber
-# processsample TChizh_53X_200_1 false $versionnumber
-# processsample TChizh_53X_250_1 false $versionnumber
+processsample TChizh_53X_150_1 false $versionnumber
+processsample TChizh_53X_200_1 false $versionnumber
+processsample TChizh_53X_250_1 false $versionnumber
 
 # processsample zhsm_53X_slim false $versionnumber
 

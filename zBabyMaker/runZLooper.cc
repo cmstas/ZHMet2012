@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void doAllZ( string prefix, string ntuplenumber, bool isData, float kFactor );
+void doAllZ( string prefix, string ntuplenumber, bool isData, float kFactor, string version );
 void pickSkimIfExists( TChain *ch, const std::string& base )
 {
 
@@ -35,17 +35,17 @@ void pickSkimIfExists( TChain *ch, const std::string& base )
   return;
 }
 
-int runZLooper( string fileprefix = "", string ntuplenumber = "", bool isdata = false )
+int runZLooper( string fileprefix = "", string ntuplenumber = "", bool isdata = false, string version )
 {
   //compile libraries
   gROOT->ProcessLine(".L ../CORE/libCMS2NtupleMacrosCORE.so");
   gROOT->ProcessLine(".L libZ_looper.so");
-  doAllZ( fileprefix.c_str(), ntuplenumber.c_str(), isdata, 1.0 );
+  doAllZ( fileprefix.c_str(), ntuplenumber.c_str(), isdata, 1.0, version );
   return 0;
 }
 
 
-void doAllZ( string prefix, string ntuplenumber, bool isData, float kFactor )
+void doAllZ( string prefix, string ntuplenumber, bool isData, float kFactor, string version )
 {
 
   TChain* ch = new TChain("Events");
@@ -296,7 +296,7 @@ void doAllZ( string prefix, string ntuplenumber, bool isData, float kFactor )
   
   try
 	{
-	  Z_looper* myLooper = new Z_looper();  
+	  Z_looper* myLooper = new Z_looper( version );  
 	  cout << "Running on sample " << prefix << endl;
 	  myLooper->ScanChain(ch, prefix.c_str(), isData, calculateTCMET, -1 ,kFactor);
 	}

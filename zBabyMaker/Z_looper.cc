@@ -73,13 +73,17 @@ const bool  pt2020               = false;
 const bool  useJson              = false;
 const float lumi                 = 1.0; 
 
-const char* iter                 = "V00-02-19";
 const char* jsonfilename         = "../jsons/Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt";
 
 // 19.5 merged json from Dunser
 // https://hypernews.cern.ch/HyperNews/CMS/get/susy-multilepton/277/1/2/1/1/1.html
 
 //--------------------------------------------------------------------
+
+Z_looper::Z_looper( string iteration = "" ) 
+{
+  iter                 = iteration;
+};
 
 float dRGenJet ( LorentzVector p4, bool isData, float ptcut = 20.0 ) {
 
@@ -615,10 +619,10 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
   string jsonsuffix = "";
   if( isData && !useJson ) jsonsuffix = "_nojson";
 
-  cout << "Writing baby ntuple " << Form("../output/%s/%s_baby%s%s%s%s.root" , iter , prefix , tpsuffix.c_str() , ptsuffix.c_str() , isosuffix.c_str() , jsonsuffix.c_str() ) << endl;
+  cout << "Writing baby ntuple " << Form("../output/%s/%s_baby%s%s%s%s.root" , iter.c_str() , prefix , tpsuffix.c_str() , ptsuffix.c_str() , isosuffix.c_str() , jsonsuffix.c_str() ) << endl;
 
-  if( doGenSelection ) MakeBabyNtuple( Form("../output/%s/%s_gen_baby%s%s%s.root"  , iter , prefix , tpsuffix.c_str() , ptsuffix.c_str() , isosuffix.c_str() ) );
-  else MakeBabyNtuple( Form("../output/%s/%s_baby%s%s%s%s.root" , iter , prefix , tpsuffix.c_str() , ptsuffix.c_str() , isosuffix.c_str() , jsonsuffix.c_str() ) );
+  if( doGenSelection ) MakeBabyNtuple( Form("../output/%s/%s_gen_baby%s%s%s.root"  , iter.c_str() , prefix , tpsuffix.c_str() , ptsuffix.c_str() , isosuffix.c_str() ) );
+  else MakeBabyNtuple( Form("../output/%s/%s_baby%s%s%s%s.root" , iter.c_str() , prefix , tpsuffix.c_str() , ptsuffix.c_str() , isosuffix.c_str() , jsonsuffix.c_str() ) );
 
   TObjArray *listOfFiles = chain->GetListOfFiles();
 
@@ -2914,7 +2918,7 @@ already_seen.clear();
 // make histos rootfile
 TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
 rootdir->cd();
-saveHist( Form("../output/%s/%s.root", iter , prefix ) );
+ saveHist( Form("../output/%s/%s.root", iter.c_str() , prefix ) );
 deleteHistos();
   
 } // end ScanChain

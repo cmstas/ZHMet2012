@@ -27,7 +27,7 @@ class JetCorrectionUncertainty;
 class Z_looper
 {
  public:
-  Z_looper() {};
+  Z_looper( std::string iteration );
   ~Z_looper() {
     delete babyFile_;
     delete babyTree_;
@@ -57,6 +57,7 @@ class Z_looper
 
  private:
                 
+  std::string iter;
   //ntuple, file
   TFile *babyFile_;
   TTree *babyTree_;
