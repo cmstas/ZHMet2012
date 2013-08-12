@@ -2,49 +2,51 @@
 
 . makeZBaby.sh
 
-# processsample zjetsmc_ee false
-# processsample zjetsmc_mm false
+versionnumber="V00-02-19"
 
-# processsample z1jet_53X_slim_ false
-# processsample z2jet_53X_slim_ false
-# processsample z3jet_53X_slim_ false
-# processsample z4jet_53X_slim_ false
+# processsample zjetsmc_ee false $versionnumber
+# processsample zjetsmc_mm false $versionnumber
 
-# processsample zjets_53X_slim false
+# processsample z1jet_53X_slim_ false $versionnumber
+# processsample z2jet_53X_slim_ false $versionnumber
+# processsample z3jet_53X_slim_ false $versionnumber
+# processsample z4jet_53X_slim_ false $versionnumber
 
-# processsample data_53X_2012A true
-# processsample data_53X_2012B true
-# processsample data_53X_2012C true
-# processsample data_53X_2012D true
+# processsample zjets_53X_slim false $versionnumber
 
-# processsample t_53X_slim false
+# processsample data_53X_2012A true $versionnumber
+# processsample data_53X_2012B true $versionnumber
+# processsample data_53X_2012C true $versionnumber
+# processsample data_53X_2012D true $versionnumber
 
-# processsample ttbar_mgdl_53X_slim false
-# processsample ttbar_mgsl_53X_slim false
-# processsample ttbar_mghad_53X_slim false
+# processsample t_53X_slim false $versionnumber
 
-# processsample TChizh_53X_150_1 false
-# processsample TChizh_53X_200_1 false
-# processsample TChizh_53X_250_1 false
+# processsample ttbar_mgdl_53X_slim false $versionnumber
+# processsample ttbar_mgsl_53X_slim false $versionnumber
+# processsample ttbar_mghad_53X_slim false $versionnumber
 
-# processsample zhsm_53X_slim false
+# processsample TChizh_53X_150_1 false $versionnumber
+# processsample TChizh_53X_200_1 false $versionnumber
+# processsample TChizh_53X_250_1 false $versionnumber
 
-# processsample zz2l2nu_53X_slim false
-# processsample zz2l2q_53X_slim false
-# processsample zz4l_53X_slim false
+# processsample zhsm_53X_slim false $versionnumber
 
-# processsample wz2l2q_53X_slim false
-# processsample wz3lnu_53X_slim false
+# processsample zz2l2nu_53X_slim false $versionnumber
+# processsample zz2l2q_53X_slim false $versionnumber
+# processsample zz4l_53X_slim false $versionnumber
 
-# processsample ww_53X_slim false
+# processsample wz2l2q_53X_slim false $versionnumber
+# processsample wz3lnu_53X_slim false $versionnumber
 
-# processsample ttz_53X_slim false
-# processsample ttw_53X_slim false
-# processsample ttg_53X_slim false
-# processsample ttww_53X_slim false
-# processsample tbz_53X_slim false
+# processsample ww_53X_slim false $versionnumber
 
-# processsample vvv_53X_slim false
+# processsample ttz_53X_slim false $versionnumber
+# processsample ttw_53X_slim false $versionnumber
+# processsample ttg_53X_slim false $versionnumber
+# processsample ttww_53X_slim false $versionnumber
+# processsample tbz_53X_slim false $versionnumber
 
-# processsample zbb2l_53X_slim false
+# processsample vvv_53X_slim false $versionnumber
+
+# processsample zbb2l_53X_slim false $versionnumber
 

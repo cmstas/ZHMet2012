@@ -1,9 +1,16 @@
+// #include <exception>
 #include <string>
 #include <vector>
 #include <iostream>
+#include <cstdlib>
+#include <stdexcept>
+#include <iostream>
 
+#include "TROOT.h"
 #include "TChain.h"
-#include "Z_looper.C"
+
+#include "Z_looper.h"
+
 using namespace std;
 
 void pickSkimIfExists( TChain *ch, const std::string& base )
@@ -30,7 +37,8 @@ void pickSkimIfExists( TChain *ch, const std::string& base )
   return;
 }
 
-void runZLooper( const string prefix, const string ntuplenumber, bool isData = true, float kFactor = 1.){
+void runZLooper( string prefix, string ntuplenumber, bool isData = true, float kFactor = 1.)
+{
 
   TChain* ch = new TChain("Events");
   string basentuplelocation = "";
@@ -55,8 +63,11 @@ void runZLooper( const string prefix, const string ntuplenumber, bool isData = t
   partialsample.push_back("8");
   partialsample.push_back("9");
 
+  // try
+  // 	{	
+  
   for( size_t njeti = 0; njeti < njet.size(); njeti++ ){
-  	for( size_t partiali = 0; partiali < partialsample.size(); partiali++ ){
+	for( size_t partiali = 0; partiali < partialsample.size(); partiali++ ){
 
 	  if( njet.at(njeti) == "1" ){
 		if( prefix == Form( "z%sjet_53X_slim_%s", 
@@ -109,6 +120,16 @@ void runZLooper( const string prefix, const string ntuplenumber, bool isData = t
 	}
   }
 
+// }
+
+  // catch (exception& e)	
+  // 	{
+  // 	  cout<<e.what()<<endl;
+  // 	  cout << "Problem with vector size. Moving on to other sample." << endl;		
+  // 	  // return;
+	  
+  // 	}
+  
   if( ch->GetEntries() == 0 ){  
 
 	//zjets ee powheg-----------------------------------------------------------------------------------
@@ -259,14 +280,22 @@ void runZLooper( const string prefix, const string ntuplenumber, bool isData = t
   cout << endl << endl;
   cout << "Checking for corrupt files" << endl;
   cout << "Entries in chain: " << ch->GetEntries() << endl;
-  ch->Draw("evt_run");
+  ch->Draw("evt_nEvts");
   cout << endl << endl;
+
 
   bool calculateTCMET = false;  //recalculate tcmet on-the-fly?
   
-  Z_looper* myLooper = new Z_looper();
-  
-  cout << "Running on sample " << prefix << endl;
-  myLooper->ScanChain(ch, prefix.c_str(), isData, calculateTCMET, -1 ,kFactor);
-  
+  try
+	{
+	  Z_looper* myLooper = new Z_looper();  
+	  cout << "Running on sample " << prefix << endl;
+	  myLooper->ScanChain(ch, prefix.c_str(), isData, calculateTCMET, -1 ,kFactor);
+	}
+  catch (exception& e)	
+  	{
+  	  cout<<e.what()<<endl;
+  	  cout << "Problem with vector size. Exiting." << endl;		
+	}  
+
 }

@@ -19,6 +19,8 @@ typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 typedef vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > VofP4;
 
 class TChain;
+class FactorizedJetCorrector;
+class JetCorrectionUncertainty;
 
 class Z_looper
 {
@@ -36,7 +38,7 @@ class Z_looper
   void ScanChain (TChain*, const char*, bool isData, bool calculateTCMET = false,
                   int my_nEvents = -1, float kFactor = 1.);
   void bookHistos();
-  bool isGoodTrack(int, bool usePV = false);
+  // bool isGoodTrack(int, bool usePV = false);
   float deltaPhi( float phi1 , float phi2);
   void fillUnderOverFlow(TH1F *h1, float value, float weight);
   void fillHistos(TH1F *h1[4],    float value, float weight, int myType);
@@ -506,11 +508,6 @@ class Z_looper
   TH1F* metParTemplate[11][23];
   TH1F* metPerpTemplate[11][23];
 
-
 };
-
-
-
-
 
 #endif

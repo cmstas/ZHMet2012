@@ -1,11 +1,11 @@
-#include "Z_looper.h"
 #include <algorithm>
 #include <iostream>
 #include <vector>
 #include <set>
 #include <math.h>
 #include <fstream>
-#include "histtools.h"
+#include <stdexcept>
+#include <sstream>
 
 #include "TChain.h"
 #include "TF1.h"
@@ -20,35 +20,41 @@
 #include "TProfile.h"
 #include "TTreeCache.h"
 #include "TDatabasePDG.h"
-#include <sstream>
 
-#include "../CORE/CMS2.cc"
+#include "../CORE/CMS2.h"
 #ifndef __CINT__
-#include "../CORE/utilities.cc"
-#include "../CORE/ssSelections.cc"
-#include "../CORE/electronSelections.cc"
-#include "../CORE/electronSelectionsParameters.cc"
-#include "../CORE/MITConversionUtilities.cc"
-#include "../CORE/muonSelections.cc"
-#include "../CORE/eventSelections.cc"
-#include "../CORE/ttbarSelections.cc"
-#include "../CORE/trackSelections.cc"
-#include "../CORE/metSelections.cc"
-#include "../CORE/jetSelections.cc"
-#include "../CORE/photonSelections.cc"
-#include "../CORE/triggerUtils.cc"
-#include "../CORE/triggerSuperModel.cc"
-#include "../CORE/mcSelections.cc"
-#include "../CORE/susySelections.cc"
-#include "../CORE/mcSUSYkfactor.cc"
-#include "../CORE/SimpleFakeRate.cc"
-#include "../Tools/goodrun.cc"
-#include "../Tools/vtxreweight.cc"
-#include "../Tools/msugraCrossSection.cc"
-#include "../Tools/bTagEff_BTV.cc"
-#include "../CORE/MT2/MT2Utility.cc"
-#include "../CORE/MT2/MT2.cc"
+#include "../CORE/utilities.h"
+#include "../CORE/ssSelections.h"
+#include "../CORE/electronSelections.h"
+#include "../CORE/electronSelectionsParameters.h"
+#include "../CORE/MITConversionUtilities.h"
+#include "../CORE/muonSelections.h"
+#include "../CORE/eventSelections.h"
+#include "../CORE/ttbarSelections.h"
+#include "../CORE/trackSelections.h"
+#include "../CORE/metSelections.h"
+#include "../CORE/jetSelections.h"
+#include "../CORE/photonSelections.h"
+#include "../CORE/triggerUtils.h"
+#include "../CORE/triggerSuperModel.h"
+#include "../CORE/mcSelections.h"
+#include "../CORE/susySelections.h"
+#include "../CORE/mcSUSYkfactor.h"
+#include "../CORE/SimpleFakeRate.h"
+#include "../CORE/MT2/MT2Utility.h"
+#include "../CORE/MT2/MT2.h"
+
+#include "../Tools/goodrun.h"
+#include "../Tools/vtxreweight.h"
+#include "../Tools/msugraCrossSection.h"
+#include "../Tools/bTagEff_BTV.h"
+
+#include "../CORE/jetcorr/FactorizedJetCorrector.h"
+#include "../CORE/jetcorr/JetCorrectionUncertainty.h"
 #endif
+
+#include "Z_looper.h"
+#include "histtools.h"
 
 using namespace tas;
 
@@ -67,7 +73,7 @@ const bool  pt2020               = false;
 const bool  useJson              = false;
 const float lumi                 = 1.0; 
 
-const char* iter                 = "V00-02-17";
+const char* iter                 = "V00-02-19";
 const char* jsonfilename         = "../jsons/Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt";
 
 // 19.5 merged json from Dunser
@@ -79,9 +85,9 @@ float dRGenJet ( LorentzVector p4, bool isData, float ptcut = 20.0 ) {
 
   if( isData ) return -99;
 
-  float mindr = 999;
+  float mindr = 999.0;
 
-  for( int i = 0 ; i < genjets_p4().size() ; i++){
+  for( size_t i = 0 ; i < genjets_p4().size() ; i++){
 
     // require genjet pt > ptcut
     if( genjets_p4().at(i).pt() < ptcut ) continue;
@@ -233,9 +239,9 @@ bool eventInList(char* list){
 
   ifstream myfile(list);
 
-  int  trun;
-  int  tlumi;
-  long tevent;
+  unsigned long trun;
+  unsigned long tlumi;
+  unsigned long tevent;
 
   while( myfile.good() ){
 
@@ -271,7 +277,7 @@ float getGenMetCustom( const char* prefix ){
 
   int nLSP = 0;
 
-  for ( int i = 0; i < genps_id().size() ; i++) {
+  for ( size_t i = 0; i < genps_id().size() ; i++) {
 
     int id = abs( cms2.genps_id().at(i) );
 
@@ -287,9 +293,9 @@ float getGenMetCustom( const char* prefix ){
       if( id == LSPID ) nLSP++;
     }
     
-    if( genps_lepdaughter_id()[i].size() > 0) {
+    if( genps_lepdaughter_id().at(i).size() > 0) {
 
-      for(unsigned int j = 0; j < cms2.genps_lepdaughter_id()[i].size(); j++) {
+      for(unsigned int j = 0; j < cms2.genps_lepdaughter_id().at(i).size(); j++) {
 
 		int iddau = abs( genps_lepdaughter_id().at(i).at(j) );
 
@@ -462,6 +468,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
     useOldIsolation = false;
     cout << "53X sample: using NEW isolation" << endl;
   }
+
 
   // else{
   //   useOldIsolation = true;
@@ -685,7 +692,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
     unsigned int nEvents = tree->GetEntries();
  
     for (unsigned int event = 0 ; event < nEvents; ++event){
-
+	  
       //Matevz
       tree->LoadTree(event);
       
@@ -700,9 +707,9 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
       // else continue;
 
       if( pfcands_charge().size() != pfcands_p4().size() ){
-		cout << "ERROR! pfcands_charge().size() " << pfcands_charge().size() << " pfcands_p4().size() " << pfcands_p4().size() << endl;
-		cout << "SKIPPING " << evt_run() << " " << evt_lumiBlock() << " " << evt_event() << endl;
-		continue;
+	  	cout << "ERROR! pfcands_charge().size() " << pfcands_charge().size() << " pfcands_p4().size() " << pfcands_p4().size() << endl;
+	  	cout << "SKIPPING " << evt_run() << " " << evt_lumiBlock() << " " << evt_event() << endl;
+	  	continue;
       }
 
       //dumpDocLines();
@@ -783,9 +790,9 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
       }
 
       if( !isData ){
-		hresponse->Fill( gen_met() , evt_pfmet() / gen_met() );
+	  	hresponse->Fill( gen_met() , evt_pfmet() / gen_met() );
       	hgenmet_all->Fill( gen_met() );
-		if( evt_pfmet() > 60 ) hgenmet_pass->Fill( gen_met() );
+	  	if( evt_pfmet() > 60 ) hgenmet_pass->Fill( gen_met() );
       }
 
       // progress feedback to user
@@ -864,157 +871,190 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	  
 		Bool_t foundwz = false;
 		// Int_t nwzpartons = 0;
-	
-		size_t size = cms2.genps_id().size(); 
-		for (size_t jj=0; jj<size; jj++) { 
-		  Int_t pid = abs(cms2.genps_id().at(jj));
-		  if ( pid == 11 ){
-			ngenels_++; 
-			genleps.push_back(cms2.genps_p4().at(jj));
-		  }
-		  if ( pid == 13 ){
-			genleps.push_back(cms2.genps_p4().at(jj));
-			ngenmus_++; 
-		  }
-		  if ( pid == 15 ) ngentaus_++; 
-		  if ( pid == 12 ){
-			gennus.push_back(cms2.genps_p4().at(jj));
-			ngennue_++; 
-		  }
-		  if ( pid == 14 ){
-			gennus.push_back(cms2.genps_p4().at(jj));
-			ngennum_++; 
-		  }
-		  if ( pid == 16 ) ngennut_++; 
-		  if ( pid == 23 ) {
-			// ptzgen_ = genps_p4().at(igen).pt();
-			foundwz = true;
-			nwzpartons_  = 0;
-		  }
+
+		try
+		  {	
+			size_t size = cms2.genps_id().size(); 
+			for (size_t jj=0; jj<size; jj++) { 
+			  Int_t pid = abs(cms2.genps_id().at(jj));
+			  if ( pid == 11 ){
+				ngenels_++; 
+				genleps.push_back(cms2.genps_p4().at(jj));
+			  }
+			  if ( pid == 13 ){
+				genleps.push_back(cms2.genps_p4().at(jj));
+				ngenmus_++; 
+			  }
+			  if ( pid == 15 ) ngentaus_++; 
+			  if ( pid == 12 ){
+				gennus.push_back(cms2.genps_p4().at(jj));
+				ngennue_++; 
+			  }
+			  if ( pid == 14 ){
+				gennus.push_back(cms2.genps_p4().at(jj));
+				ngennum_++; 
+			  }
+			  if ( pid == 16 ) ngennut_++; 
+			  if ( pid == 23 ) {
+				// ptzgen_ = genps_p4().at(igen).pt();
+				foundwz = true;
+				nwzpartons_  = 0;
+			  }
 		  
-		  if (foundwz && ( pid == 1 || pid == 2 || pid == 3 || pid == 4 || pid == 5 || pid == 6 || pid == 21 ) ) {  
-			nwzpartons_++;
-		  }
+			  if (foundwz && ( pid == 1 || pid == 2 || pid == 3 || pid == 4 || pid == 5 || pid == 6 || pid == 21 ) ) {  
+				nwzpartons_++;
+			  }
 		
-		  //-------------------------------------------------------------
-		  // loop over gen particles to find b quarks
-		  //-------------------------------------------------------------
-		  if ( abs(pid) == 5 ) {
-			Float_t m2 = cms2.genps_p4().at(jj).M2();
-			Float_t m  = m2 >= 0 ? sqrt(m2) : 0.0;
-			if (m > 0.) {
-			  ++ngenbs_;
-			  genbquarks.push_back(cms2.genps_p4().at(jj));
+			  //-------------------------------------------------------------
+			  // loop over gen particles to find b quarks
+			  //-------------------------------------------------------------
+			  if ( abs(pid) == 5 ) {
+				Float_t m2 = cms2.genps_p4().at(jj).M2();
+				Float_t m  = m2 >= 0 ? sqrt(m2) : 0.0;
+				if (m > 0.) {
+				  ++ngenbs_;
+				  genbquarks.push_back(cms2.genps_p4().at(jj));
+				}
+			  }
 			}
-		  }
-		}
 	  	
-		if( genleps.size() > 0 ){
-		  genlep1_ = &genleps.at(0);
-		}
-		else if( genleps.size() > 1 ){
-		  genlep1_ = &genleps.at(0);
-		  genlep2_ = &genleps.at(1);
-		}
-		if( gennus.size() > 0 ){
-		  gennu1_ = &genleps.at(0);
-		}
-		else if( gennus.size() > 1 ){
-		  gennu1_ = &gennus.at(0);
-		  gennu2_ = &gennus.at(1);
-		}
+			try
+			  {
+				if( genleps.size() == 1 ){
+				  genlep1_ = &genleps.at(0);
+				}
+				else if( genleps.size() > 1 ){
+				  genlep1_ = &genleps.at(0);
+				  genlep2_ = &genleps.at(1);
+				}
+				if( gennus.size() == 1 ){
+				  gennu1_ = &genleps.at(0);
+				}
+				else if( gennus.size() > 1 ){
+				  gennu1_ = &gennus.at(0);
+				  gennu2_ = &gennus.at(1);
+				}
 
-		ngenleps_ = ngenels_ + ngenmus_ + ngentaus_;
-		ngennu_   = ngennue_ + ngennum_ + ngennut_;		
-		pthat_  = cms2.genps_pthat();	
-	  }
+			  }
+			catch (exception& e)	
+			  {
+				cout<<e.what()<<endl;
+				cout<<"Problem before line: "<<__LINE__<<endl;
+				cout<<"problem with getting genleps/nus vars."<<endl;
+			  }
 
-	  sort(genbquarks.begin(), genbquarks.end(), sortByPt);
-	  if( genbquarks.size() > 0 ){
-		genbquark1_ = &(genbquarks.at(0));
+			ngenleps_ = ngenels_ + ngenmus_ + ngentaus_;
+			ngennu_   = ngennue_ + ngennum_ + ngennut_;		
+			pthat_  = cms2.genps_pthat();	
+
+		  }
+		catch (exception& e)	
+		  {
+			cout<<e.what()<<endl;
+			cout<<"Problem before line: "<<__LINE__<<endl;
+			cout<<"problem with getting gen vars."<<endl;
+		  }
+	 
 	  }
-	  if( genbquarks.size() > 1 ){
-		genbquark2_ = &(genbquarks.at(1));
-	  }
-	  if( genbquarks.size() > 2 ){
-		genbquark3_ = &(genbquarks.at(2));
-	  }
-	  if( genbquarks.size() > 3 ){
-		genbquark4_ = &(genbquarks.at(3));
-	  }
+		
+		sort(genbquarks.begin(), genbquarks.end(), sortByPt);
+		if( genbquarks.size() > 0 ){
+		  genbquark1_ = &(genbquarks.at(0));
+		}
+		if( genbquarks.size() > 1 ){
+		  genbquark2_ = &(genbquarks.at(1));
+		}
+		if( genbquarks.size() > 2 ){
+		  genbquark3_ = &(genbquarks.at(2));
+		}
+		if( genbquarks.size() > 3 ){
+		  genbquark4_ = &(genbquarks.at(3));
+		}
+		
 	
-	
-	mg_ = -1.;
-	ml_ = -1.; 
-	x_  = -1.;
+	  mg_ = -1.;
+	  ml_ = -1.; 
+	  x_  = -1.;
 
-	genmetcustom_ = 0;
+	  genmetcustom_ = 0;
 
-	if(!isData && (TString(prefix).Contains("T5zz") || TString(prefix).Contains("sms") || TString(prefix).Contains("gmsb") ) ){
 
-	  if     (TString(prefix).Contains("T5zz" ) ){
-		mg_ = -1;//sparm_mG();
-		ml_ = -1;//sparm_mL();
-		x_  = -1;//sparm_mf();
-		weight_ = lumi * gluinoPairCrossSection(mg_) * (1000./105000.);
-	  }
-
-	  else if( !isData && TString(prefix).Contains("wzsms") ){
-		mg_ = cms2.sparm_values().at(0);
-		ml_ = cms2.sparm_values().at(1);
-		x_  = -999;
-
-		int   mgbin = xsec_C1N2->FindBin(mg_);
-		float xsec  = xsec_C1N2->GetBinContent(mgbin);
+	try
+	  {		  
 	  
-		/*
-		  float xsec1 = xsec_C1N2->GetBinContent(mgbin);
-		  float xsec2 = xsec_C1N2->GetBinContent(mgbin+1);
+		if(!isData && (TString(prefix).Contains("T5zz") || TString(prefix).Contains("sms") || TString(prefix).Contains("gmsb") ) ){
 
-		  int   mgint = (int) mg_;
-		  float xsec  = 0;
+		  if     (TString(prefix).Contains("T5zz" ) ){
+			mg_ = -1;//sparm_mG();
+			ml_ = -1;//sparm_mL();
+			x_  = -1;//sparm_mf();
+			weight_ = lumi * gluinoPairCrossSection(mg_) * (1000./105000.);
+		  }
 
-		  // temporary fix: have cross sections in 25 GeV steps only....
-		  if( mgint%25 ==  0 ) xsec = xsec1;
-		  if( mgint%25 ==  5 ) xsec = 0.8 * xsec1 + 0.2 * xsec2;
-		  if( mgint%25 == 10 ) xsec = 0.6 * xsec1 + 0.4 * xsec2;
-		  if( mgint%25 == 15 ) xsec = 0.4 * xsec1 + 0.6 * xsec2;
-		  if( mgint%25 == 20 ) xsec = 0.2 * xsec1 + 0.8 * xsec2;
+		  else if( !isData && TString(prefix).Contains("wzsms") ){
+			mg_ = cms2.sparm_values().at(0);
+			ml_ = cms2.sparm_values().at(1);
+			x_  = -999;
 
-		  // cout << endl;
-		  // cout << "mg    " << mg_      << endl;
-		  // cout << "mgbin " << mgbin    << endl;
-		  // cout << "mod   " << mgint%25 << endl;
-		  // cout << "xsec  " << xsec     << endl;
-		  */
+			int   mgbin = xsec_C1N2->FindBin(mg_);
+			float xsec  = xsec_C1N2->GetBinContent(mgbin);
+	  
+			/*
+			  float xsec1 = xsec_C1N2->GetBinContent(mgbin);
+			  float xsec2 = xsec_C1N2->GetBinContent(mgbin+1);
 
-		weight_ = lumi * xsec * (1000.0/100000.);
+			  int   mgint = (int) mg_;
+			  float xsec  = 0;
+
+			  // temporary fix: have cross sections in 25 GeV steps only....
+			  if( mgint%25 ==  0 ) xsec = xsec1;
+			  if( mgint%25 ==  5 ) xsec = 0.8 * xsec1 + 0.2 * xsec2;
+			  if( mgint%25 == 10 ) xsec = 0.6 * xsec1 + 0.4 * xsec2;
+			  if( mgint%25 == 15 ) xsec = 0.4 * xsec1 + 0.6 * xsec2;
+			  if( mgint%25 == 20 ) xsec = 0.2 * xsec1 + 0.8 * xsec2;
+
+			  // cout << endl;
+			  // cout << "mg    " << mg_      << endl;
+			  // cout << "mgbin " << mgbin    << endl;
+			  // cout << "mod   " << mgint%25 << endl;
+			  // cout << "xsec  " << xsec     << endl;
+			  */
+
+			weight_ = lumi * xsec * (1000.0/100000.);
+		  }
+
+		  else if( !isData && TString(prefix).Contains("zzsms") ){
+			mg_ = -1;//sparm_mN();
+			ml_ = -1;//sparm_mL();
+			x_  = -999;
+			int bin = xsec_N1N2->FindBin(mg_);
+			weight_ = lumi * xsec_N1N2->GetBinContent(bin) * (1.0/52600.);
+		  }
+
+		  else if( !isData && TString(prefix).Contains("gmsb") ){
+
+			mg_     = cms2.sparm_values().at(0);
+			weight_ = lumi * getGMSBCrossSection( mg_ ) * (1000.0 / 300000.0);
+
+			ml_ = -999;
+			x_  = -999;
+		  }
+	
+		  if( doTenPercent )	  weight_ *= 10;
+		  //weight_ *= 10; // REMOVE
+
+		  genmetcustom_ = getGenMetCustom(prefix);
+
+		}	
+
+	  }
+	catch (exception& e)	
+	  {
+		cout<<e.what()<<endl;
+		cout<<"Problem before line: "<<__LINE__<<endl;
+		cout<<"problem with hyp_ll."<<endl;
 	  }
 
-	  else if( !isData && TString(prefix).Contains("zzsms") ){
-		mg_ = -1;//sparm_mN();
-		ml_ = -1;//sparm_mL();
-		x_  = -999;
-		int bin = xsec_N1N2->FindBin(mg_);
-		weight_ = lumi * xsec_N1N2->GetBinContent(bin) * (1.0/52600.);
-	  }
-
-	  else if( !isData && TString(prefix).Contains("gmsb") ){
-
-		mg_     = cms2.sparm_values().at(0);
-		weight_ = lumi * getGMSBCrossSection( mg_ ) * (1000.0 / 300000.0);
-
-		ml_ = -999;
-		x_  = -999;
-	  }
-
-	  if( doTenPercent )	  weight_ *= 10;
-	  //weight_ *= 10; // REMOVE
-
-	  genmetcustom_ = getGenMetCustom(prefix);
-
-	}
-      
 	// calomet, pfmet, genmet
 	met_       = cms2.evt_met();
 	metphi_    = cms2.evt_metPhi();
@@ -1028,7 +1068,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 
 	pfmett1_     = cms2.evt_pfmet_type1cor();
 	pfmett1phi_  = cms2.evt_pfmetPhi_type1cor();
-
+	
 	std::pair<float, float> Type1PFMetPair = myMetCorrector->getCorrectedMET();
 	pfmett1new_     = Type1PFMetPair.first;
 	pfmett1newphi_  = Type1PFMetPair.second;
@@ -1063,7 +1103,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		if(nz != 1 ) cout << "ERROR NZ " << nz << endl;
 	  }
 	}
-      
+	      
 	st_ = -1;
 
 	if( !isData && TString(prefix).Contains("singletop") ){
@@ -1074,7 +1114,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		cout << "Unrecognized single top sample " << evt_dataset().at(0) << endl;
 	  }
 	}
-
+	
 	vector<unsigned int> v_goodHyps;
 	v_goodHyps.clear();
 
@@ -1151,7 +1191,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		killedJet.push_back( false );
 		goodMuonIndices.push_back( imu );
 		int ipf = mus_pfmusidx().at(imu);
-		if( ipf < pfmus_p4().size() && ipf >= 0 ){
+		if( ipf < (int)pfmus_p4().size() && ipf >= 0 ){
 		  goodPFMuonIndices.push_back( imu );
 		}
 	  }
@@ -1477,26 +1517,26 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	
 	  if( abs(id1_) == 13 ){
 		int mcid1   = mus_mc3idx().at(index1);
-		if( mcid1 >=0 && mcid1 < genps_p4().size() ){
+		if( mcid1 >=0 && mcid1 < (int)genps_p4().size() ){
 		  ptgen1_   = genps_p4().at(mcid1).pt();
 		}
 	  }
 	  else if( abs(id1_) == 11 ){
 		int mcid1   = els_mc3idx().at(index1);
-		if( mcid1 >=0 && mcid1 < genps_p4().size() ){
+		if( mcid1 >=0 && mcid1 < (int)genps_p4().size() ){
 		  ptgen1_   = genps_p4().at(mcid1).pt();
 		}
 	  }
 
 	  if( abs(id2_) == 13 ){
 		int mcid2   = mus_mc3idx().at(index2);
-		if( mcid2 >=0 && mcid2 < genps_p4().size() ){
+		if( mcid2 >=0 && mcid2 < (int)genps_p4().size() ){
 		  ptgen2_   = genps_p4().at(mcid2).pt();
 		}
 	  }
 	  else if( abs(id2_) == 11 ){
 		int mcid2   = els_mc3idx().at(index2);
-		if( mcid2 >=0 && mcid2 < genps_p4().size() ){
+		if( mcid2 >=0 && mcid2 < (int)genps_p4().size() ){
 		  ptgen2_   = genps_p4().at(mcid2).pt();
 		}
 	  }
@@ -1580,10 +1620,10 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	if( nlep_ > 2 ){
 
 	  // find extra leptons
-	  int   imax  = -1;
+	  // int   imax  = -1;
 	  float maxpt = -1.;
 	
-	  for( int ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
+	  for( int ilep = 0 ; ilep < (int)goodLeptons.size() ; ilep++ ){
 		//if( dRbetweenVectors( *lep1_ , goodLeptons.at(ilep) ) < 0.00001 ) continue;
 		//if( dRbetweenVectors( *lep2_ , goodLeptons.at(ilep) ) < 0.00001 ) continue;
 
@@ -1605,13 +1645,13 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 
 		if( goodLeptons.at(ilep).pt() > maxpt ){
 		  maxpt = goodLeptons.at(ilep).pt();
-		  imax = ilep;
+		  // imax = ilep;
 		}
 
 	  }
 
 	
-	  if( nlep_ != 2 + goodExtraLeptons.size() ){
+	  if( nlep_ != 2 + (int)goodExtraLeptons.size() ){
 
 		cout << endl << endl;
 		cout << "WARNING" << endl;
@@ -1620,7 +1660,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		cout << "nleptons " << nlep_ << endl;
 		cout << "extra leptons " << goodExtraLeptons.size() << endl;
 	  
-		for( int ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
+		for( int ilep = 0 ; ilep < (int)goodLeptons.size() ; ilep++ ){
 
 		  cout << ilep << " " << goodLeptonIDs.at(ilep) << " " << goodLeptons.at(ilep).pt() << " " << goodLeptons.at(ilep).eta() << " " << goodLeptons.at(ilep).phi() << endl;
 
@@ -1669,10 +1709,10 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		id6_  = getLeptonID(goodExtraLeptons.at(3));
 	  }
 
-	  if( goodExtraLeptons.size() > 0 ){
-		LorentzVector* pfmet_p4 = new LorentzVector( pfmet_ * cos(pfmetphi_) , pfmet_ * sin(pfmetphi_) ,      0      , pfmet_     );
+	  // if( goodExtraLeptons.size() > 0 ){
+	  // 	LorentzVector* pfmet_p4 = new LorentzVector( pfmet_ * cos(pfmetphi_) , pfmet_ * sin(pfmetphi_) ,      0      , pfmet_     );
 		//w_ = &(*lep3_+*pfmet_p4);
-	  }
+	  // }
 	}
 
 
@@ -1707,7 +1747,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	if( abs( hyp_ll_id()[hypIdx] ) == 13 ){
 
 	  int ipf_ll = mus_pfmusidx().at(hyp_ll_index().at(hypIdx));
-	  if( ipf_ll >= pfmus_p4().size() || ipf_ll < 0 ){
+	  if( ipf_ll >= (int)pfmus_p4().size() || ipf_ll < 0 ){
 		//cout << "Error, pfmuon ll index out of range " << ipf_ll << endl;
 		//printEvent();
 		ptll_pf_ = -1;
@@ -1727,7 +1767,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	  if( !isData ){
 		int mcid   = mus_mc3idx().at(muidx);
 		//cout << "ll mcid " << mcid << endl;
-		if( mcid >=0 && mcid < genps_p4().size() ){
+		if( mcid >=0 && mcid < (int)genps_p4().size() ){
 		  ptllgen_   = genps_p4().at(mcid).pt();
 		}else{
 		  //cout << "Error, ll MC index " << mcid << " size " << genps_p4().size() << endl;
@@ -1738,7 +1778,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	if( abs( hyp_lt_id()[hypIdx] ) == 13 ){
 
 	  int ipf_lt = mus_pfmusidx()[hyp_lt_index()[hypIdx]];
-	  if( ipf_lt >= pfmus_p4().size() || ipf_lt < 0 ){
+	  if( ipf_lt >= (int)pfmus_p4().size() || ipf_lt < 0 ){
 		ptlt_pf_ = -1;
 		//cout << "Error, pfmuon lt index out of range " << ipf_lt << endl;
 		//printEvent();
@@ -1758,7 +1798,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	  if( !isData ){
 		int mcid   = mus_mc3idx().at(muidx);
 		//cout << "lt mcid " << mcid << endl;
-		if( mcid >=0 && mcid < genps_p4().size() ){
+		if( mcid >=0 && mcid < (int)genps_p4().size() ){
 		  ptltgen_   = genps_p4().at(mcid).pt();
 		}else{
 		  //cout << "Error, lt MC index " << mcid << " size " << genps_p4().size() <<endl;
@@ -1774,7 +1814,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	
 	  //dilmasspf_ = -9999;
 	
-	  if( ipf_lt >= pfmus_p4().size() || ipf_ll >= pfmus_p4().size() ){
+	  if( ipf_lt >= (int)pfmus_p4().size() || ipf_ll >= (int)pfmus_p4().size() ){
 		cout << "Error, pfmuon out of range: SHOULDN'T GET HERE!!" << endl;
 	  }else{
 		//dilmasspf_ = ( pfmus_p4().at(ipf_ll) + pfmus_p4().at(ipf_lt) ).mass();
@@ -1784,31 +1824,41 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	//pfjet matched to electron (ll)
 
 	if( abs( hyp_ll_id()[hypIdx] ) == 11 ){
-
+	  
 	  float drjet_ll = 100;
 	  int   ijet_ll  = -1;
-
-	  for (unsigned int ijet = 0 ; ijet < pfjets_p4().size() ; ijet++) {
+	  
+	  try
+		{
+		  for (unsigned int ijet = 0 ; ijet < pfjets_p4().size() ; ijet++) {
           
-		LorentzVector vjet = pfjets_p4().at(ijet);
-		LorentzVector vll  = hyp_ll_p4()[hypIdx];
+			LorentzVector vjet = pfjets_p4().at(ijet);
+			LorentzVector vll  = hyp_ll_p4()[hypIdx];
           
-		if( vjet.pt()  < 10  )             continue;
-		if( fabs(vjet.eta()) > 3.0 )       continue;
+			if( vjet.pt()  < 10  )             continue;
+			if( fabs(vjet.eta()) > 3.0 )       continue;
           
-		float dr = dRbetweenVectors(vjet, vll);
+			float dr = dRbetweenVectors(vjet, vll);
           
-		if( dr < drjet_ll ){
-		  drjet_ll    = dr;
-		  ijet_ll     = ijet;
-		}
-	  }
+			if( dr < drjet_ll ){
+			  drjet_ll    = dr;
+			  ijet_ll     = ijet;
+			}
+		  }
       
-	  if( ijet_ll >= 0 ){
-		drjet_ll_   = drjet_ll;
-		jetpt_ll_   = pfjets_p4().at(ijet_ll).pt();
-		pfjetid_ll_ = passesPFJetID( ijet_ll ) ? 1 : 0;
-	  }
+		  if( ijet_ll >= 0 ){
+			drjet_ll_   = drjet_ll;
+			jetpt_ll_   = pfjets_p4().at(ijet_ll).pt();
+			pfjetid_ll_ = passesPFJetID( ijet_ll ) ? 1 : 0;
+		  }
+
+		}
+	  catch (exception& e)	
+		{
+		  cout<<e.what()<<endl;
+		  cout<<"Problem before line: "<<__LINE__<<endl;
+		  cout<<"problem with hyp_ll."<<endl;
+		}
 	}
 
 	//pfjet matched to electron (lt)
@@ -1818,29 +1868,40 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	  float drjet_lt = 100;
 	  int   ijet_lt  = -1;
 
-	  for (unsigned int ijet = 0 ; ijet < pfjets_p4().size() ; ijet++) {
-          
-		LorentzVector vjet = pfjets_p4().at(ijet);
-		LorentzVector vlt  = hyp_lt_p4()[hypIdx];
-          
-		if( vjet.pt()  < 10  )             continue;
-		if( fabs(vjet.eta()) > 3.0 )       continue;
-          
-		float dr = dRbetweenVectors(vjet, vlt);
-          
-		if( dr < drjet_lt ){
-		  drjet_lt    = dr;
-		  ijet_lt     = ijet;
-		}
-	  }
+	  try
+		{
 
-	  if( ijet_lt >= 0 ){
-		drjet_lt_   = drjet_lt;
-		jetpt_lt_   = pfjets_p4().at(ijet_lt).pt();
-		pfjetid_lt_ = passesPFJetID( ijet_lt ) ? 1 : 0;
+		  for (unsigned int ijet = 0 ; ijet < pfjets_p4().size() ; ijet++) {
+          
+			LorentzVector vjet = pfjets_p4().at(ijet);
+			LorentzVector vlt  = hyp_lt_p4()[hypIdx];
+          
+			if( vjet.pt()  < 10  )             continue;
+			if( fabs(vjet.eta()) > 3.0 )       continue;
+          
+			float dr = dRbetweenVectors(vjet, vlt);
+          
+			if( dr < drjet_lt ){
+			  drjet_lt    = dr;
+			  ijet_lt     = ijet;
+			}
+		  }
+
+		  if( ijet_lt >= 0 ){
+			drjet_lt_   = drjet_lt;
+			jetpt_lt_   = pfjets_p4().at(ijet_lt).pt();
+			pfjetid_lt_ = passesPFJetID( ijet_lt ) ? 1 : 0;
+		  }
+		
+
+		}
+	  catch (exception& e)	
+		{
+		  cout<<e.what()<<endl;
+		  cout<<"Problem before line: "<<__LINE__<<endl;
+		  cout<<"problem with jets."<<endl;
 	  }
-	}
-      
+	}      
 	//---------------------
 	// tcmet stuff
 	//---------------------
@@ -1891,83 +1952,94 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 
 	nGoodVertex_   = 0;
 
-	for (size_t v = 0; v < cms2.vtxs_position().size(); ++v){
-	  if(isGoodVertex(v)) nGoodVertex_++;
-	}
+	try
+	  {
 
-	vtxweight_ = 1;
-	if( !isData ){
-	  vtxweight_ = vtxweight();
-	}
+		for (size_t v = 0; v < cms2.vtxs_position().size(); ++v){
+		  if(isGoodVertex(v)) nGoodVertex_++;
+		}
 
-	// electron energy scale stuff
+		vtxweight_ = 1;
+		if( !isData ){
+		  vtxweight_ = vtxweight();
+		}
 
-	dilmasscor_  = dilmass_;
-	tcmetcor_    = tcmet_;
-	pfmetcor_    = pfmet_;
+		// electron energy scale stuff
 
-	if( leptype_ == 0 ){
+		dilmasscor_  = dilmass_;
+		tcmetcor_    = tcmet_;
+		pfmetcor_    = pfmet_;
 
-	  if     ( fabs( etall_ ) < 1.474 && fabs( etalt_ ) < 1.479 ) ecaltype_ = 1; //EB-EB
-	  else if( fabs( etall_ ) > 1.474 && fabs( etalt_ ) > 1.479 ) ecaltype_ = 2; //EE-EE
-	  else                                                        ecaltype_ = 3; //EB-EE
+		if( leptype_ == 0 ){
+
+		  if     ( fabs( etall_ ) < 1.474 && fabs( etalt_ ) < 1.479 ) ecaltype_ = 1; //EB-EB
+		  else if( fabs( etall_ ) > 1.474 && fabs( etalt_ ) > 1.479 ) ecaltype_ = 2; //EE-EE
+		  else                                                        ecaltype_ = 3; //EB-EE
         
-	  if( isData ){
+		  if( isData ){
 
-		LorentzVector vllcor;
-		LorentzVector vltcor;
+			LorentzVector vllcor;
+			LorentzVector vltcor;
 
-		float tcmetcor_x = tcmet_ * cos( tcmetphi_ );
-		float tcmetcor_y = tcmet_ * sin( tcmetphi_ );
+			float tcmetcor_x = tcmet_ * cos( tcmetphi_ );
+			float tcmetcor_y = tcmet_ * sin( tcmetphi_ );
 
-		float pfmetcor_x = pfmet_ * cos( pfmetphi_ );
-		float pfmetcor_y = pfmet_ * sin( pfmetphi_ );
+			float pfmetcor_x = pfmet_ * cos( pfmetphi_ );
+			float pfmetcor_y = pfmet_ * sin( pfmetphi_ );
        
-		//ll correction
-		if( fabs( etall_ ) < 1.474 ){ //correct for EB electron
-		  vllcor      = 1.01 * hyp_ll_p4()[hypIdx];  
+			//ll correction
+			if( fabs( etall_ ) < 1.474 ){ //correct for EB electron
+			  vllcor      = 1.01 * hyp_ll_p4().at(hypIdx);  
             
-		  tcmetcor_x -= 0.01 * hyp_ll_p4()[hypIdx].x();
-		  tcmetcor_y -= 0.01 * hyp_ll_p4()[hypIdx].y();
+			  tcmetcor_x -= 0.01 * hyp_ll_p4().at(hypIdx).x();
+			  tcmetcor_y -= 0.01 * hyp_ll_p4().at(hypIdx).y();
 
-		  pfmetcor_x -= 0.01 * hyp_ll_p4()[hypIdx].x();
-		  pfmetcor_y -= 0.01 * hyp_ll_p4()[hypIdx].y();
-		}
-		else{                         //correct for EE electron
-		  vllcor      = 1.03 * hyp_ll_p4()[hypIdx]; 
+			  pfmetcor_x -= 0.01 * hyp_ll_p4().at(hypIdx).x();
+			  pfmetcor_y -= 0.01 * hyp_ll_p4().at(hypIdx).y();
+			}
+			else{                         //correct for EE electron
+			  vllcor      = 1.03 * hyp_ll_p4().at(hypIdx); 
 
-		  tcmetcor_x -= 0.03 * hyp_ll_p4()[hypIdx].x();
-		  tcmetcor_y -= 0.03 * hyp_ll_p4()[hypIdx].y();
+			  tcmetcor_x -= 0.03 * hyp_ll_p4().at(hypIdx).x();
+			  tcmetcor_y -= 0.03 * hyp_ll_p4().at(hypIdx).y();
 
-		  pfmetcor_x -= 0.03 * hyp_ll_p4()[hypIdx].x();
-		  pfmetcor_y -= 0.03 * hyp_ll_p4()[hypIdx].y();
-		}
+			  pfmetcor_x -= 0.03 * hyp_ll_p4().at(hypIdx).x();
+			  pfmetcor_y -= 0.03 * hyp_ll_p4().at(hypIdx).y();
+			}
 
-		//lt correction
-		if( fabs( etalt_ ) < 1.474 ){ //correct for EB electron
-		  vltcor      = 1.01 * hyp_lt_p4()[hypIdx];  
+			//lt correction
+			if( fabs( etalt_ ) < 1.474 ){ //correct for EB electron
+			  vltcor      = 1.01 * hyp_lt_p4().at(hypIdx);  
             
-		  tcmetcor_x -= 0.01 * hyp_lt_p4()[hypIdx].x();
-		  tcmetcor_y -= 0.01 * hyp_lt_p4()[hypIdx].y();
+			  tcmetcor_x -= 0.01 * hyp_lt_p4().at(hypIdx).x();
+			  tcmetcor_y -= 0.01 * hyp_lt_p4().at(hypIdx).y();
 
-		  pfmetcor_x -= 0.01 * hyp_lt_p4()[hypIdx].x();
-		  pfmetcor_y -= 0.01 * hyp_lt_p4()[hypIdx].y();
-		}
-		else{                         //correct for EE electron
-		  vltcor      = 1.03 * hyp_lt_p4()[hypIdx]; 
+			  pfmetcor_x -= 0.01 * hyp_lt_p4().at(hypIdx).x();
+			  pfmetcor_y -= 0.01 * hyp_lt_p4().at(hypIdx).y();
+			}
+			else{                         //correct for EE electron
+			  vltcor      = 1.03 * hyp_lt_p4().at(hypIdx); 
 
-		  tcmetcor_x -= 0.03 * hyp_lt_p4()[hypIdx].x();
-		  tcmetcor_y -= 0.03 * hyp_lt_p4()[hypIdx].y();
+			  tcmetcor_x -= 0.03 * hyp_lt_p4().at(hypIdx).x();
+			  tcmetcor_y -= 0.03 * hyp_lt_p4().at(hypIdx).y();
 
-		  pfmetcor_x -= 0.03 * hyp_lt_p4()[hypIdx].x();
-		  pfmetcor_y -= 0.03 * hyp_lt_p4()[hypIdx].y();
-		}
+			  pfmetcor_x -= 0.03 * hyp_lt_p4().at(hypIdx).x();
+			  pfmetcor_y -= 0.03 * hyp_lt_p4().at(hypIdx).y();
+			}
           
-		dilmasscor_  = ( vllcor + vltcor ).mass();
-		tcmetcor_    = sqrt( tcmetcor_x * tcmetcor_x + tcmetcor_y * tcmetcor_y );
-		pfmetcor_    = sqrt( pfmetcor_x * pfmetcor_x + pfmetcor_y * pfmetcor_y );
+			dilmasscor_  = ( vllcor + vltcor ).mass();
+			tcmetcor_    = sqrt( tcmetcor_x * tcmetcor_x + tcmetcor_y * tcmetcor_y );
+			pfmetcor_    = sqrt( pfmetcor_x * pfmetcor_x + pfmetcor_y * pfmetcor_y );
+		  }
+		}
+
 	  }
-	}
+	catch (exception& e)	
+	  {
+		cout<<e.what()<<endl;
+		cout<<"Problem before line: "<<__LINE__<<endl;
+		cout<<"problem with killed jets."<<endl;
+	  }
 
          
 	//jet stuff--------------------------------------------------------------------- 
@@ -2009,8 +2081,8 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	// for ( unsigned int ijet = 0 ; ijet < jpts_p4().size() ; ijet++ ) {
           
 	//   LorentzVector vjet   = jpts_cor().at(ijet) * jpts_p4().at(ijet);
-	//   LorentzVector vlt    = hyp_lt_p4()[hypIdx];
-	//   LorentzVector vll    = hyp_ll_p4()[hypIdx];
+	//   LorentzVector vlt    = hyp_lt_p4().at(hypIdx);
+	//   LorentzVector vll    = hyp_ll_p4().at(hypIdx);
 
 	//   if( fabs( vjet.eta() ) > 2.5 )           continue;
 	//   if( vjet.pt()  < 30.         )           continue;
@@ -2030,11 +2102,20 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	//   nJPT_++;
 	// } 
         
-	//reset killedJet vector
-	for( int ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
-	  killedJet.at( ilep ) = false;
-	}
-        
+	try
+	  {
+		//reset killedJet vector
+		for( int ilep = 0 ; ilep < (int)goodLeptons.size() ; ilep++ ){
+		  killedJet.at( ilep ) = false;
+		}
+	  }
+	catch (exception& e)	
+	  {
+		cout<<e.what()<<endl;
+		cout<<"Problem before line: "<<__LINE__<<endl;
+		cout<<"problem with killed jets."<<endl;
+	  }
+
 	VofP4 goodJets;
 	VofP4 goodJetsUp;
 	VofP4 goodJetsDn;
@@ -2062,304 +2143,316 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	//-----------------------------------------------------------------------------
 	// loop over pfjets pt > 30 GeV |eta| < 3.0, dR > 0.4 overlap removal, PFJetID
 	//-----------------------------------------------------------------------------
+	  
+	  try
+		{
+		
+		for (unsigned int ijet = 0 ; ijet < pfjets_p4().size() ; ijet++) {
 
-	for (unsigned int ijet = 0 ; ijet < pfjets_p4().size() ; ijet++) {
+		  if( fabs( pfjets_p4().at(ijet).eta() ) > 5.0 ) continue;
 
-	  if( fabs( pfjets_p4().at(ijet).eta() ) > 5.0 ) continue;
+		  LorentzVector vjetold = pfjets_corL1FastL2L3().at(ijet) * pfjets_p4().at(ijet);
 
-	  LorentzVector vjetold = pfjets_corL1FastL2L3().at(ijet) * pfjets_p4().at(ijet);
+		  //---------------
+		  // OFFICIAL JEC
+		  //---------------
 
-	  //---------------
-	  // OFFICIAL JEC
-	  //---------------
+		  //---------------------------------------------------------------------------
+		  // get total correction: L1FastL2L3 for MC, L1FastL2L3Residual for data
+		  //---------------------------------------------------------------------------
 
-	  //---------------------------------------------------------------------------
-	  // get total correction: L1FastL2L3 for MC, L1FastL2L3Residual for data
-	  //---------------------------------------------------------------------------
+		  jet_corrector_pfL1FastJetL2L3->setRho   ( cms2.evt_ww_rho_vor()           );
+		  jet_corrector_pfL1FastJetL2L3->setJetA  ( cms2.pfjets_area().at(ijet)     );
+		  jet_corrector_pfL1FastJetL2L3->setJetPt ( cms2.pfjets_p4().at(ijet).pt()  );
+		  jet_corrector_pfL1FastJetL2L3->setJetEta( cms2.pfjets_p4().at(ijet).eta() );
+		  double corr = jet_corrector_pfL1FastJetL2L3->getCorrection();
 
-	  jet_corrector_pfL1FastJetL2L3->setRho   ( cms2.evt_ww_rho_vor()           );
-	  jet_corrector_pfL1FastJetL2L3->setJetA  ( cms2.pfjets_area().at(ijet)     );
-	  jet_corrector_pfL1FastJetL2L3->setJetPt ( cms2.pfjets_p4().at(ijet).pt()  );
-	  jet_corrector_pfL1FastJetL2L3->setJetEta( cms2.pfjets_p4().at(ijet).eta() );
-	  double corr = jet_corrector_pfL1FastJetL2L3->getCorrection();
+		  LorentzVector vjet   = corr * pfjets_p4().at(ijet);
 
-	  LorentzVector vjet   = corr * pfjets_p4().at(ijet);
+		  // int leptonOverlap = 0;
+		  // for( int ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
+		  //   if( dRbetweenVectors( vjet , goodLeptons.at(ilep) ) < 0.4 && goodLeptons.at(ilep).pt() > 20.0 ) leptonOverlap = 1;  
+		  // }
 
-	  // int leptonOverlap = 0;
-	  // for( int ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
-	  //   if( dRbetweenVectors( vjet , goodLeptons.at(ilep) ) < 0.4 && goodLeptons.at(ilep).pt() > 20.0 ) leptonOverlap = 1;  
-	  // }
+		  // if( nEventsTotal <= 100 ){
+		  //   if( pfjets_p4().at(ijet).pt() > 20.0 ){
+		  //     printf("RelValZMM 53X:   %u\t%u\t%u\t%4.3f\t%4.3f\t%4.3f\t%4.3f\t%4.3f\t%u\t%u\t%4.3f\n", 
+		  // 	   evt_run() , evt_lumiBlock(), evt_event(), pfjets_p4().at(ijet).pt() , corr , vjet.pt() , vjet.eta(), vjet.phi(), 
+		  // 	   leptonOverlap , passesPFJetID(ijet) , cms2.evt_ww_rho_vor() );
+		  //   }
+		  // }
 
-	  // if( nEventsTotal <= 100 ){
-	  //   if( pfjets_p4().at(ijet).pt() > 20.0 ){
-	  //     printf("RelValZMM 53X:   %u\t%u\t%u\t%4.3f\t%4.3f\t%4.3f\t%4.3f\t%4.3f\t%u\t%u\t%4.3f\n", 
-	  // 	   evt_run() , evt_lumiBlock(), evt_event(), pfjets_p4().at(ijet).pt() , corr , vjet.pt() , vjet.eta(), vjet.phi(), 
-	  // 	   leptonOverlap , passesPFJetID(ijet) , cms2.evt_ww_rho_vor() );
-	  //   }
-	  // }
-
-	  //---------------------------------------------------------------------------
-	  // get JES uncertainty
-	  //---------------------------------------------------------------------------
+		  //---------------------------------------------------------------------------
+		  // get JES uncertainty
+		  //---------------------------------------------------------------------------
 	
-	  pfUncertainty->setJetEta(vjet.eta());
-	  pfUncertainty->setJetPt(vjet.pt());   // here you must use the CORRECTED jet pt
-	  double unc = pfUncertainty->getUncertainty(true);
+		  pfUncertainty->setJetEta(vjet.eta());
+		  pfUncertainty->setJetPt(vjet.pt());   // here you must use the CORRECTED jet pt
+		  double unc = pfUncertainty->getUncertainty(true);
 
-	  LorentzVector vjetUp = corr * pfjets_p4().at(ijet) * ( 1 + unc );
-	  LorentzVector vjetDn = corr * pfjets_p4().at(ijet) * ( 1 - unc );
+		  LorentzVector vjetUp = corr * pfjets_p4().at(ijet) * ( 1 + unc );
+		  LorentzVector vjetDn = corr * pfjets_p4().at(ijet) * ( 1 - unc );
 
-	  //---------------------------------------------------------------------------
-	  // store uncertainty vs. jet pt, for various bins (idiot check)
-	  //---------------------------------------------------------------------------
+		  //---------------------------------------------------------------------------
+		  // store uncertainty vs. jet pt, for various bins (idiot check)
+		  //---------------------------------------------------------------------------
 
-	  float abseta = fabs( vjet.eta() );
-	  if     ( abseta < 0.5                 ) hunc_eta1->Fill(vjet.pt(),unc);
-	  else if( abseta > 0.5 && abseta < 1.0 ) hunc_eta2->Fill(vjet.pt(),unc);
-	  else if( abseta > 1.0 && abseta < 1.5 ) hunc_eta3->Fill(vjet.pt(),unc);
-	  else if( abseta > 1.5 && abseta < 2.0 ) hunc_eta4->Fill(vjet.pt(),unc);
-	  else if( abseta > 2.0 && abseta < 2.5 ) hunc_eta5->Fill(vjet.pt(),unc);
-	  else if( abseta > 2.5 && abseta < 3.0 ) hunc_eta6->Fill(vjet.pt(),unc);
+		  float abseta = fabs( vjet.eta() );
+		  if     ( abseta < 0.5                 ) hunc_eta1->Fill(vjet.pt(),unc);
+		  else if( abseta > 0.5 && abseta < 1.0 ) hunc_eta2->Fill(vjet.pt(),unc);
+		  else if( abseta > 1.0 && abseta < 1.5 ) hunc_eta3->Fill(vjet.pt(),unc);
+		  else if( abseta > 1.5 && abseta < 2.0 ) hunc_eta4->Fill(vjet.pt(),unc);
+		  else if( abseta > 2.0 && abseta < 2.5 ) hunc_eta5->Fill(vjet.pt(),unc);
+		  else if( abseta > 2.5 && abseta < 3.0 ) hunc_eta6->Fill(vjet.pt(),unc);
 
-	  //---------------------------------------------------------------------------
-	  // lepton overlap removal
-	  //---------------------------------------------------------------------------
+		  //---------------------------------------------------------------------------
+		  // lepton overlap removal
+		  //---------------------------------------------------------------------------
           
-	  LorentzVector vlt    = hyp_lt_p4()[hypIdx];
-	  LorentzVector vll    = hyp_ll_p4()[hypIdx];
+		  LorentzVector vlt    = hyp_lt_p4().at(hypIdx);
+		  LorentzVector vll    = hyp_ll_p4().at(hypIdx);
      
-	  if( generalLeptonVeto ){
-		bool rejectJet = false;
-		for( int ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
-		  if( dRbetweenVectors( vjet , goodLeptons.at(ilep) ) < 0.4 && goodLeptons.at(ilep).pt() > 20.0 ) rejectJet = true;  
-		}
-		if( rejectJet ) continue;
-	  }
+		  if( generalLeptonVeto ){
+			bool rejectJet = false;
+			for( size_t ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
+			  if( dRbetweenVectors( vjet , goodLeptons.at(ilep) ) < 0.4 && goodLeptons.at(ilep).pt() > 20.0 ) rejectJet = true;  
+			}
+			if( rejectJet ) continue;
+		  }
 
-	  if( dRbetweenVectors(vjet, vll) < 0.4 ) continue;
-	  if( dRbetweenVectors(vjet, vlt) < 0.4 ) continue;
+		  if( dRbetweenVectors(vjet, vll) < 0.4 ) continue;
+		  if( dRbetweenVectors(vjet, vlt) < 0.4 ) continue;
 
-	  //---------------------------------------------------------------------------
-	  // PFJetID
-	  //---------------------------------------------------------------------------
+		  //---------------------------------------------------------------------------
+		  // PFJetID
+		  //---------------------------------------------------------------------------
 
-	  if( !passesPFJetID(ijet) ){
-		failjetid_ = 1;
-		continue;
-	  }
+		  if( !passesPFJetID(ijet) ){
+			failjetid_ = 1;
+			continue;
+		  }
 
-	  if( fabs( vjet.eta() ) > 3.0 ) continue;
+		  if( fabs( vjet.eta() ) > 3.0 ) continue;
 
-	  if ( vjet.pt()   > 40. ){
-		nJets40_++;
-		ht40_ += vjet.pt();
-	  }
+		  if ( vjet.pt()   > 40. ){
+			nJets40_++;
+			ht40_ += vjet.pt();
+		  }
 
-	  if ( vjetUp.pt()   > 40. ){
-		njets40up_++;
-		ht40up_ += vjet.pt();
-	  }
+		  if ( vjetUp.pt()   > 40. ){
+			njets40up_++;
+			ht40up_ += vjet.pt();
+		  }
 
-	  if ( vjetDn.pt()   > 40. ){
-		njets40dn_++;
-		ht40dn_ += vjet.pt();
-	  }
+		  if ( vjetDn.pt()   > 40. ){
+			njets40dn_++;
+			ht40dn_ += vjet.pt();
+		  }
 
-	  if( fabs( vjet.eta() ) > 2.5 ) continue;
+		  if( fabs( vjet.eta() ) > 2.5 ) continue;
 
-	  float beta = pfjet_beta(ijet,2,0.5);
+		  float beta = pfjet_beta(ijet,2,0.5);
 
-	  if( beta < 0.2 ){
-		if( vjet.pt() > 30.0 ){
-		  npujets_++;
-		  pujets_.push_back(vjet);
-		}
-		continue;
-	  }
+		  if( beta < 0.2 ){
+			if( vjet.pt() > 30.0 ){
+			  npujets_++;
+			  pujets_.push_back(vjet);
+			}
+			continue;
+		  }
 
-	  //---------------------------------------------------------------------------
-	  // jet passes: now store various quantities
-	  //---------------------------------------------------------------------------
+		  //---------------------------------------------------------------------------
+		  // jet passes: now store various quantities
+		  //---------------------------------------------------------------------------
 
-	  if( vjetold.pt() > 30 ) nJetsOld_++;
+		  if( vjetold.pt() > 30 ) nJetsOld_++;
 
-	  //--------------------
-	  // OFFICIAL JEC
-	  //--------------------
+		  //--------------------
+		  // OFFICIAL JEC
+		  //--------------------
 
-	  //------------------------------------------------------------------------------------------------------------
-	  // MET correction quantities
-	  // here we store 2 quantities:
-	  // the delta(METx/y) you get by varying the jet with pT > 10 GeV by their uncertainties (dmetx,dmety
-	  // the vector sum of pT > 10 GeV selected jets (jetptx,jetpty) --> use this to calculate unclustered energy
-	  //------------------------------------------------------------------------------------------------------------
+		  //------------------------------------------------------------------------------------------------------------
+		  // MET correction quantities
+		  // here we store 2 quantities:
+		  // the delta(METx/y) you get by varying the jet with pT > 10 GeV by their uncertainties (dmetx,dmety
+		  // the vector sum of pT > 10 GeV selected jets (jetptx,jetpty) --> use this to calculate unclustered energy
+		  //------------------------------------------------------------------------------------------------------------
 
-	  if( vjet.pt() > 10 ){
-		dmetx  += vjetUp.px() - vjet.px();
-		dmety  += vjetUp.py() - vjet.py();
-		jetptx += vjet.px();
-		jetpty += vjet.py();
-	  }
+		  if( vjet.pt() > 10 ){
+			dmetx  += vjetUp.px() - vjet.px();
+			dmety  += vjetUp.py() - vjet.py();
+			jetptx += vjet.px();
+			jetpty += vjet.py();
+		  }
 
-	  if ( vjet.pt() > 10. ){
-		sumJetPt10_ += vjet.pt();
-	  }
+		  if ( vjet.pt() > 10. ){
+			sumJetPt10_ += vjet.pt();
+		  }
 
-	  if ( vjet.pt() > 15. ){
-		sumJetPt_ += vjet.pt();
-		jetSystem += vjet;
+		  if ( vjet.pt() > 15. ){
+			sumJetPt_ += vjet.pt();
+			jetSystem += vjet;
 
-		float emfrac = pfjets_neutralEmE().at(ijet) / pfjets_p4().at(ijet).energy();
-		if( emfrac > maxemf_ ) maxemf_ = emfrac;
-	  }
+			float emfrac = pfjets_neutralEmE().at(ijet) / pfjets_p4().at(ijet).energy();
+			if( emfrac > maxemf_ ) maxemf_ = emfrac;
+		  }
 
-	  if ( vjetUp.pt() > 20. ){
-		nJetsUp_++;
-		goodJetsUp.push_back( vjetUp );
-	  }
+		  if ( vjetUp.pt() > 20. ){
+			nJetsUp_++;
+			goodJetsUp.push_back( vjetUp );
+		  }
 
-	  if ( vjetDn.pt() > 20. ){
-		nJetsDn_++;
-		goodJetsDn.push_back( vjetDn );
-	  }
+		  if ( vjetDn.pt() > 20. ){
+			nJetsDn_++;
+			goodJetsDn.push_back( vjetDn );
+		  }
 
-	  if( vjet.pt() < 30. )                    continue;
+		  if( vjet.pt() < 30. )                    continue;
           
-	  if( vjet.pt() < 100.0 ){
-		if( pfjets_trackCountingHighEffBJetTag().at(ijet) > 1.7 )  nbvz_++;
-	  }
+		  if( vjet.pt() < 100.0 ){
+			if( pfjets_trackCountingHighEffBJetTag().at(ijet) > 1.7 )  nbvz_++;
+		  }
 
-	  else{
-		if( pfjets_trackCountingHighEffBJetTag().at(ijet) > 3.3 )  nbvz_++;
-	  }
+		  else{
+			if( pfjets_trackCountingHighEffBJetTag().at(ijet) > 3.3 )  nbvz_++;
+		  }
 
-	  goodJets.push_back(vjet);
+		  goodJets.push_back(vjet);
 
-	  //find max jet pt
-	  if( vjet.pt() > maxpt ){
-		maxpt   = vjet.pt();
-		imaxjet = ijet;
-	  }
+		  //find max jet pt
+		  if( vjet.pt() > maxpt ){
+			maxpt   = vjet.pt();
+			imaxjet = ijet;
+		  }
           
-	  //find jet (anti-)aligned with tcmet
-	  if( fabs( cos( tcmetphi_ - vjet.phi() ) ) > maxcosdphi ){
-		maxcosdphi  = fabs( cos( tcmetphi_ - vjet.phi() ) );
-		//imaxcosphi  = ijet;
-		dphijetmet_ = fabs( tcmetphi_ - vjet.phi() );
-		if( dphijetmet_ > TMath::Pi() ) dphijetmet_ = TMath::TwoPi() - dphijetmet_;
-	  }
+		  //find jet (anti-)aligned with tcmet
+		  if( fabs( cos( tcmetphi_ - vjet.phi() ) ) > maxcosdphi ){
+			maxcosdphi  = fabs( cos( tcmetphi_ - vjet.phi() ) );
+			//imaxcosphi  = ijet;
+			dphijetmet_ = fabs( tcmetphi_ - vjet.phi() );
+			if( dphijetmet_ > TMath::Pi() ) dphijetmet_ = TMath::TwoPi() - dphijetmet_;
+		  }
 
-	  if( pfjets_trackCountingHighEffBJetTag().at(ijet) > 1.7 )  nbl_++;
-	  if( pfjets_trackCountingHighEffBJetTag().at(ijet) > 3.3 )  nbm_++;
+		  if( pfjets_trackCountingHighEffBJetTag().at(ijet) > 1.7 )  nbl_++;
+		  if( pfjets_trackCountingHighEffBJetTag().at(ijet) > 3.3 )  nbm_++;
 
 	
-	  if(  pfjets_combinedSecondaryVertexBJetTag().at(ijet) > 0.244 ){
-		nbcsvl_++;
-	  }if( pfjets_combinedSecondaryVertexBJetTag().at(ijet) > 0.679 ){
-		nbcsvm_++;
-		goodBJets.push_back(vjet);
-	  }
-	  if( pfjets_combinedSecondaryVertexBJetTag().at(ijet) > 0.898 ){
-		nbcsvt_++;
-		goodTightBJets.push_back(vjet);
-	  }
+		  if(  pfjets_combinedSecondaryVertexBJetTag().at(ijet) > 0.244 ){
+			nbcsvl_++;
+		  }if( pfjets_combinedSecondaryVertexBJetTag().at(ijet) > 0.679 ){
+			nbcsvm_++;
+			goodBJets.push_back(vjet);
+		  }
+		  if( pfjets_combinedSecondaryVertexBJetTag().at(ijet) > 0.898 ){
+			nbcsvt_++;
+			goodTightBJets.push_back(vjet);
+		  }
 
-	  if( vjet.pt() < 100.0 ){
-		if( pfjets_combinedSecondaryVertexBJetTag().at(ijet) > 0.244 )  nbcsvlm_++;
-	  }
+		  if( vjet.pt() < 100.0 ){
+			if( pfjets_combinedSecondaryVertexBJetTag().at(ijet) > 0.244 )  nbcsvlm_++;
+		  }
 
-	  else{
-		if( pfjets_combinedSecondaryVertexBJetTag().at(ijet) > 0.679 )  nbcsvlm_++;
-	  }
+		  else{
+			if( pfjets_combinedSecondaryVertexBJetTag().at(ijet) > 0.679 )  nbcsvlm_++;
+		  }
 
-	  //weight (scale factor) branches
+		  //weight (scale factor) branches
 
-	  if( !isData ) {
+		  if( !isData ) {
 
-		const float pt      = pfjets_p4().at(ijet).pt();
-		const float eta     = fabs( pfjets_p4().at(ijet).eta() );
-		const float sfscale = 1.04; //recommendation to increase SF
+			const float pt      = pfjets_p4().at(ijet).pt();
+			const float eta     = fabs( pfjets_p4().at(ijet).eta() );
+			const float sfscale = 1.04; //recommendation to increase SF
 
-		if( eta < 2.4 ) { //can't be mistagged if outside
+			if( eta < 2.4 ) { //can't be mistagged if outside
 
-		  //double getMisTagRate(double jet_pt, double jet_eta, string algo){
-		  const float mt  = getMisTagRate            ( pt, eta, pt < 100 ? "TCHEL" : "TCHEM" );
-		  const float mte = sfscale*getMisTagRate_Err( pt, eta, pt < 100 ? "TCHEL" : "TCHEM" );
+			  //double getMisTagRate(double jet_pt, double jet_eta, string algo){
+			  const float mt  = getMisTagRate            ( pt, eta, pt < 100 ? "TCHEL" : "TCHEM" );
+			  const float mte = sfscale*getMisTagRate_Err( pt, eta, pt < 100 ? "TCHEL" : "TCHEM" );
 
-		  //double getMisTagSF(double jet_pt, double jet_eta, string algo){
-		  const float mtsf  = sfscale*getMisTagSF    ( pt, eta, pt < 100 ? "TCHEL" : "TCHEM" );
-		  const float mtsfe = sfscale*getMisTagSF_Err( pt, eta, pt < 100 ? "TCHEL" : "TCHEM" );
+			  //double getMisTagSF(double jet_pt, double jet_eta, string algo){
+			  const float mtsf  = sfscale*getMisTagSF    ( pt, eta, pt < 100 ? "TCHEL" : "TCHEM" );
+			  const float mtsfe = sfscale*getMisTagSF_Err( pt, eta, pt < 100 ? "TCHEL" : "TCHEM" );
 
-		  btagweight_   *= (1-mt)/(1-mt/mtsf);                   //reset to 1 every event, so always just multiply
-		  btagweightup_ *= (1-mt-mte)/(1-(mt+mte)/(mtsf+mtsfe)); //add error to mistag and SF
+			  btagweight_   *= (1-mt)/(1-mt/mtsf);                   //reset to 1 every event, so always just multiply
+			  btagweightup_ *= (1-mt-mte)/(1-(mt+mte)/(mtsf+mtsfe)); //add error to mistag and SF
 	    
+			}
+		  }
+
+		  if ( vjet.pt()   > 30. ){
+			ht30_ += vjet.pt();
+			nJets_++;
+		  }
 		}
-	  }
 
-	  if ( vjet.pt()   > 30. ){
-		ht30_ += vjet.pt();
-		nJets_++;
-	  }
-	}
-
-	//---------------
-	// OFFICIAL JEC
-	//---------------
+		//---------------
+		// OFFICIAL JEC
+		//---------------
       
-	st30_ = ht30_ + pfmet_ + (*lep1_).pt() + (*lep2_).pt();
-	st40_ = ht40_ + pfmet_ + (*lep1_).pt() + (*lep2_).pt();
+		st30_ = ht30_ + pfmet_ + (*lep1_).pt() + (*lep2_).pt();
+		st40_ = ht40_ + pfmet_ + (*lep1_).pt() + (*lep2_).pt();
 
-	//---------------------------------------
-	// now calculate METup and METdown
-	//---------------------------------------
+		//---------------------------------------
+		// now calculate METup and METdown
+		//---------------------------------------
 
-	float pfmetx = evt_pfmet() * cos( evt_pfmetPhi() );
-	float pfmety = evt_pfmet() * sin( evt_pfmetPhi() );
+		float pfmetx = evt_pfmet() * cos( evt_pfmetPhi() );
+		float pfmety = evt_pfmet() * sin( evt_pfmetPhi() );
 
-	//--------------------------------------------------------
-	// calculate unclustered energy x and y components
-	// unclustered energy = -1 X ( MET + jets + leptons )
-	//--------------------------------------------------------
+		//--------------------------------------------------------
+		// calculate unclustered energy x and y components
+		// unclustered energy = -1 X ( MET + jets + leptons )
+		//--------------------------------------------------------
 
-	unclustered_x_ = -1 * ( pfmetx + jetptx );
-	unclustered_y_ = -1 * ( pfmety + jetpty );
+		unclustered_x_ = -1 * ( pfmetx + jetptx );
+		unclustered_y_ = -1 * ( pfmety + jetpty );
 
-	for( int ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
-	  unclustered_x_ -= goodLeptons.at(ilep).px();
-	  unclustered_y_ -= goodLeptons.at(ilep).py();
-	}
+		for( size_t ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
+		  unclustered_x_ -= goodLeptons.at(ilep).px();
+		  unclustered_y_ -= goodLeptons.at(ilep).py();
+		}
       
-	//------------------------------------------------------------------------------
-	// now vary jets according to JEC uncertainty, vary unclustered energy by 10%
-	//------------------------------------------------------------------------------
+		//------------------------------------------------------------------------------
+		// now vary jets according to JEC uncertainty, vary unclustered energy by 10%
+		//------------------------------------------------------------------------------
 
-	float pfmetx_up = pfmetx - dmetx - 0.1 * unclustered_x_; 
-	float pfmety_up = pfmety - dmety - 0.1 * unclustered_y_; 
+		float pfmetx_up = pfmetx - dmetx - 0.1 * unclustered_x_; 
+		float pfmety_up = pfmety - dmety - 0.1 * unclustered_y_; 
 
-	// pfmet DOWN
-	pfmetUp_ = sqrt( pfmetx_up * pfmetx_up + pfmety_up * pfmety_up );
+		// pfmet DOWN
+		pfmetUp_ = sqrt( pfmetx_up * pfmetx_up + pfmety_up * pfmety_up );
 
-	float pfmetx_dn = pfmetx + dmetx + 0.1 * unclustered_x_; 
-	float pfmety_dn = pfmety + dmety + 0.1 * unclustered_y_; 
+		float pfmetx_dn = pfmetx + dmetx + 0.1 * unclustered_x_; 
+		float pfmety_dn = pfmety + dmety + 0.1 * unclustered_y_; 
 
-	// pfmet UP
-	pfmetDn_ = sqrt( pfmetx_dn * pfmetx_dn + pfmety_dn * pfmety_dn );
+		// pfmet UP
+		pfmetDn_ = sqrt( pfmetx_dn * pfmetx_dn + pfmety_dn * pfmety_dn );
 
-	unclustered_ = sqrt( pow(unclustered_x_,2) + pow(unclustered_y_,2));
+		unclustered_ = sqrt( pow(unclustered_x_,2) + pow(unclustered_y_,2));
        
-	jetmax_pt_ = -1;
+		jetmax_pt_ = -1;
 
-	if( imaxjet > -1 ){
-	  jetmax_pt_       = pfjets_cor().at(imaxjet) * pfjets_p4().at(imaxjet).pt();
-	  jetmax_dphimet_  = deltaPhi( pfjets_p4().at(imaxjet).phi() , tcmetphi_);
-	}
+		if( imaxjet > -1 ){
+		  jetmax_pt_       = pfjets_cor().at(imaxjet) * pfjets_p4().at(imaxjet).pt();
+		  jetmax_dphimet_  = deltaPhi( pfjets_p4().at(imaxjet).phi() , tcmetphi_);
+		}
 
-	vecJetPt_ = jetSystem.pt();
+		vecJetPt_ = jetSystem.pt();
+
+	  }
+	catch (exception& e)	
+	  {
+		cout<<e.what()<<endl;
+		cout<<"Problem before line: "<<__LINE__<<endl;
+		cout<<"problem with the jets."<<endl;
+	  }
 
 	//-------------------------------------------------------------
 	// variables for lljj mass bump
 	//-------------------------------------------------------------
-
+try
+  {
 	sort(goodJets.begin()    , goodJets.end()    , sortByPt);
 	sort(goodJetsUp.begin()  , goodJetsUp.end()  , sortByPt);
 	sort(goodJetsDn.begin()  , goodJetsDn.end()  , sortByPt);
@@ -2380,13 +2473,11 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	  jet1beta2_10_  = pfjet_beta(jetidx1,2,1.0);
 	  jet1flav_      = isGenQGLMatched ( goodJets.at(0) , isData );
 	  jet1drgen_     = dRGenJet ( goodJets.at(0) , isData );
-
 	  if (!isData) {
 		jet1mcfa_ = pfjets_mcflavorAlgo().at(jetidx1);
 		jet1mcfp_ = pfjets_mcflavorPhys().at(jetidx1);
 	  }
 	}
-
 	if( goodJets.size()  > 1 ){
 	  jet2_       = &(goodJets.at(1));
 	  int jetidx2 = getJetIndex( goodJets.at(1) , jet_corrector_pfL1FastJetL2L3 );
@@ -2406,7 +2497,6 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		jet2mcfa_ = pfjets_mcflavorAlgo().at(jetidx2);
 		jet2mcfp_ = pfjets_mcflavorPhys().at(jetidx2);
 	  }
-
 	}
 	if( goodJets.size()  > 2 ){
 	  jet3_       = &(goodJets.at(2));
@@ -2427,7 +2517,6 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		jet3mcfa_ = pfjets_mcflavorAlgo().at(jetidx3);
 		jet3mcfp_ = pfjets_mcflavorPhys().at(jetidx3);
 	  }
-
 	}
 	if( goodJets.size()  > 3 ){
 	  jet4_       = &(goodJets.at(3));
@@ -2448,8 +2537,18 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		jet4mcfa_ = pfjets_mcflavorAlgo().at(jetidx4);
 		jet4mcfp_ = pfjets_mcflavorPhys().at(jetidx4);
 	  }
-
 	}
+
+	  }
+	catch (exception& e)	
+	  {
+		cout<<e.what()<<endl;
+		cout<<"Problem before line: "<<__LINE__<<endl;
+		cout<<"problem with the jet vars for jets 1-4."<<endl;
+	  }
+
+try
+  {
 	if( goodJets.size()  > 4 ){
 	  jet5_       = &(goodJets.at(4));
 	  int jetidx5 = getJetIndex( goodJets.at(4) , jet_corrector_pfL1FastJetL2L3 );
@@ -2483,6 +2582,16 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	  jetgenb8_   = isOverlap( *jet8_, genbquarks, 0.4 );
 	}
 
+	  }
+	catch (exception& e)	
+	  {
+		cout<<e.what()<<endl;
+		cout<<"Problem before line: "<<__LINE__<<endl;
+		cout<<"problem with the jet vars for jets 5-8."<<endl;
+	  }
+
+try
+  {
 	// if( goodJets.size()  > 0 ) jet1_   = &(goodJets.at(0));
 	// if( goodJets.size()  > 1 ) jet2_   = &(goodJets.at(1));
 	// if( goodJets.size()  > 2 ) jet3_   = &(goodJets.at(2));
@@ -2537,183 +2646,214 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	mbb_ = -1;
 	if( goodBJets.size() > 1 ) mbb_ = ( *bjet1_ + *bjet2_ ).mass();
 
+	  }
+	catch (exception& e)	
+	  {
+		cout<<e.what()<<endl;
+		cout<<"Problem before line: "<<__LINE__<<endl;
+		cout<<"problem with the rest of the jet vars."<<endl;
+	  }
+
 	//-------------------------
 	// M(l,b) variables
 	//-------------------------
+	try
+	  {
+		if( goodBJets.size() > 0 ){
+		  mlb1_    = 9999;
+		  mlb2_    = 9999;
+		  drblmin_ = 9999;
 
-	if( goodBJets.size() > 0 ){
-	  mlb1_    = 9999;
-	  mlb2_    = 9999;
-	  drblmin_ = 9999;
+		  for( int i = 0 ; i < goodBJets.size() ; ++i ){
+			float m1 = ( *lep1_ + goodBJets.at(i) ).mass();
+			float m2 = ( *lep2_ + goodBJets.at(i) ).mass();
 
-	  for( int i = 0 ; i < goodBJets.size() ; ++i ){
-		float m1 = ( *lep1_ + goodBJets.at(i) ).mass();
-		float m2 = ( *lep2_ + goodBJets.at(i) ).mass();
+			if( m1 < mlb1_ ) mlb1_ = m1;
+			if( m2 < mlb2_ ) mlb2_ = m2;
 
-		if( m1 < mlb1_ ) mlb1_ = m1;
-		if( m2 < mlb2_ ) mlb2_ = m2;
+			float dr1 = dRbetweenVectors( *lep1_ , goodBJets.at(i) );
+			float dr2 = dRbetweenVectors( *lep2_ , goodBJets.at(i) );
 
-		float dr1 = dRbetweenVectors( *lep1_ , goodBJets.at(i) );
-		float dr2 = dRbetweenVectors( *lep2_ , goodBJets.at(i) );
+			if( dr1 < drblmin_ ) drblmin_ = dr1;
+			if( dr2 < drblmin_ ) drblmin_ = dr2;
 
-		if( dr1 < drblmin_ ) drblmin_ = dr1;
-		if( dr2 < drblmin_ ) drblmin_ = dr2;
+		  }
+		}
 
-	  }
-	}
+		else{
+		  mlb1_    = -1;
+		  mlb2_    = -1;
+		  drblmin_ = -1;
+		}
 
-	else{
-	  mlb1_    = -1;
-	  mlb2_    = -1;
-	  drblmin_ = -1;
-	}
+		if( goodBJets.size() == 2 ){
+		  float m10 = ( *lep1_ + goodBJets.at(0) ).mass();
+		  float m11 = ( *lep1_ + goodBJets.at(1) ).mass();
+		  float m20 = ( *lep2_ + goodBJets.at(0) ).mass();
+		  float m21 = ( *lep2_ + goodBJets.at(1) ).mass();
 
-	if( goodBJets.size() == 2 ){
-	  float m10 = ( *lep1_ + goodBJets.at(0) ).mass();
-	  float m11 = ( *lep1_ + goodBJets.at(1) ).mass();
-	  float m20 = ( *lep2_ + goodBJets.at(0) ).mass();
-	  float m21 = ( *lep2_ + goodBJets.at(1) ).mass();
+		  mlbmin_ = m10;
+		  if( m11 < mlbmin_ ) mlbmin_ = m11;
+		  if( m20 < mlbmin_ ) mlbmin_ = m20;
+		  if( m21 < mlbmin_ ) mlbmin_ = m21;
+		}
 
-	  mlbmin_ = m10;
-	  if( m11 < mlbmin_ ) mlbmin_ = m11;
-	  if( m20 < mlbmin_ ) mlbmin_ = m20;
-	  if( m21 < mlbmin_ ) mlbmin_ = m21;
-	}
+		else{
+		  mlbmin_ = -1;
+		}
 
-	else{
-	  mlbmin_ = -1;
-	}
+		if( goodTightBJets.size() > 0 ){
+		  mlbt1_ = 9999;
+		  mlbt2_ = 9999;
 
-	if( goodTightBJets.size() > 0 ){
-	  mlbt1_ = 9999;
-	  mlbt2_ = 9999;
+		  for( int i = 0 ; i < goodTightBJets.size() ; ++i ){
+			float m1 = ( *lep1_ + goodTightBJets.at(i) ).mass();
+			float m2 = ( *lep2_ + goodTightBJets.at(i) ).mass();
 
-	  for( int i = 0 ; i < goodTightBJets.size() ; ++i ){
-		float m1 = ( *lep1_ + goodTightBJets.at(i) ).mass();
-		float m2 = ( *lep2_ + goodTightBJets.at(i) ).mass();
+			if( m1 < mlbt1_ ) mlbt1_ = m1;
+			if( m2 < mlbt2_ ) mlbt2_ = m2;
+		  }
+		}
 
-		if( m1 < mlbt1_ ) mlbt1_ = m1;
-		if( m2 < mlbt2_ ) mlbt2_ = m2;
-	  }
-	}
+		else{
+		  mlbt1_ = -1;
+		  mlbt2_ = -1;
+		}
 
-	else{
-	  mlbt1_ = -1;
-	  mlbt2_ = -1;
-	}
+		if( goodTightBJets.size() == 2 ){
+		  float m10 = ( *lep1_ + goodTightBJets.at(0) ).mass();
+		  float m11 = ( *lep1_ + goodTightBJets.at(1) ).mass();
+		  float m20 = ( *lep2_ + goodTightBJets.at(0) ).mass();
+		  float m21 = ( *lep2_ + goodTightBJets.at(1) ).mass();
 
-	if( goodTightBJets.size() == 2 ){
-	  float m10 = ( *lep1_ + goodTightBJets.at(0) ).mass();
-	  float m11 = ( *lep1_ + goodTightBJets.at(1) ).mass();
-	  float m20 = ( *lep2_ + goodTightBJets.at(0) ).mass();
-	  float m21 = ( *lep2_ + goodTightBJets.at(1) ).mass();
+		  mlbtmin_ = m10;
+		  if( m11 < mlbtmin_ ) mlbtmin_ = m11;
+		  if( m20 < mlbtmin_ ) mlbtmin_ = m20;
+		  if( m21 < mlbtmin_ ) mlbtmin_ = m21;
+		}
 
-	  mlbtmin_ = m10;
-	  if( m11 < mlbtmin_ ) mlbtmin_ = m11;
-	  if( m20 < mlbtmin_ ) mlbtmin_ = m20;
-	  if( m21 < mlbtmin_ ) mlbtmin_ = m21;
-	}
-
-	else{
-	  mlbtmin_ = -1;
-	}
+		else{
+		  mlbtmin_ = -1;
+		}
       
-	mt2_ = MT2( evt_pfmet() , evt_pfmetPhi() , hyp_ll_p4()[hypIdx] , hyp_lt_p4()[hypIdx] , 0. , false );
+		mt2_ = MT2( evt_pfmet() , evt_pfmetPhi() , hyp_ll_p4().at(hypIdx) , hyp_lt_p4().at(hypIdx) , 0. , false );
+		mt2j_ = -1;
 
-	mt2j_ = -1;
+		if( nJets_ > 1){
+		  mt2j_ = MT2J( evt_pfmet() , evt_pfmetPhi() , hyp_ll_p4().at(hypIdx) , hyp_lt_p4().at(hypIdx), goodJets );
+		}
 
-	if( nJets_ > 1){
-	  mt2j_ = MT2J( evt_pfmet() , evt_pfmetPhi() , hyp_ll_p4()[hypIdx] , hyp_lt_p4()[hypIdx], goodJets );
-	}
-
+	  }
+	catch (exception& e)	
+	  {
+		cout<<e.what()<<endl;
+		cout<<"problem with the mt2j or mlb vars."<<endl;
+	  }
+	
 	//---------------------------------------------
 	// Look for gen Z, ttbar in relevant samples
 	//---------------------------------------------
+	try
+	  {
 
-	if ( !isData && (TString(prefix).Contains("zjets") || TString(prefix).Contains("ttbar")) ) {
-	  int ntops = 0;
-	  for (unsigned int igen = 0; igen < cms2.genps_id().size(); ++igen) {
-		int id = cms2.genps_id().at(igen);
-		if ( (id == 23) && TString(prefix).Contains("zjets") ) {
-		  genz_ = &(cms2.genps_p4().at(igen));
-		  break;
-		} else if ( (id == 6) && TString(prefix).Contains("ttbar") ) {
-		  gent_ = &(cms2.genps_p4().at(igen));
-		  ++ntops;
-		} else if ( (id == -6) && TString(prefix).Contains("ttbar") ) {
-		  gentbar_ = &(cms2.genps_p4().at(igen));
-		  ++ntops;
-		}
-	  } // loop over genps
+		if ( !isData && (TString(prefix).Contains("zjets") || TString(prefix).Contains("ttbar")) ) {
+		  int ntops = 0;
+		  for (unsigned int igen = 0; igen < cms2.genps_id().size(); ++igen) {
+			int id = cms2.genps_id().at(igen);
+			if ( (id == 23) && TString(prefix).Contains("zjets") ) {
+			  genz_ = &(cms2.genps_p4().at(igen));
+			  break;
+			} else if ( (id == 6) && TString(prefix).Contains("ttbar") ) {
+			  gent_ = &(cms2.genps_p4().at(igen));
+			  ++ntops;
+			} else if ( (id == -6) && TString(prefix).Contains("ttbar") ) {
+			  gentbar_ = &(cms2.genps_p4().at(igen));
+			  ++ntops;
+			}
+		  } // loop over genps
 
-	  if (TString(prefix).Contains("ttbar")) {
-		// make sure we only found 2 tops
-		if (ntops == 2 && gent_ && gentbar_) {
-		  LorentzVector ttpair = *gent_ + *gentbar_;
-		  genttbar_ = &ttpair;
-		} else {
-		  cout << __FILE__ << " " << __LINE__ << " ERROR! found " << ntops << " tops instead of 2!" << endl;
-		}
-	  }
-	} // if zjets or ttbar
+		  if (TString(prefix).Contains("ttbar")) {
+			// make sure we only found 2 tops
+			if (ntops == 2 && gent_ && gentbar_) {
+			  LorentzVector ttpair = *gent_ + *gentbar_;
+			  genttbar_ = &ttpair;
+			} else {
+			  cout << __FILE__ << " " << __LINE__ << " ERROR! found " << ntops << " tops instead of 2!" << endl;
+			}
+		  }
+		} // if zjets or ttbar
   
-	if( cms2.evt_isRealData() ) {
-	  ecallaser_ = passECALLaserFilter();
-	  csc_       = passCSCBeamHaloFilter();
-	  hbhe_      = cms2.evt_hbheFilter();
-	  hcallaser_ = passHCALLaserFilter();
-	  ecaltp_    = passECALDeadCellFilter();
-	  trkfail_   = passTrackingFailureFilter();
-	  eebadsc_   = passeeBadScFilter();
-	  hbhenew_   = passHBHEFilter();
-	}else{
-	  ecallaser_ = 1;
-	  csc_       = 1;
-	  hbhe_      = 1;
-	  hcallaser_ = 1;
-	  ecaltp_    = 1;
-	  trkfail_   = 1;
-	  eebadsc_   = 1;
-	  hbhenew_   = 1;
-	}
-
-	//-------------------------
-	// Taus
-	//-------------------------
-
-	Int_t indexTauMax = -1;
-	Float_t ptTauMax = 0.0;
-
-	for (unsigned int itau=0; itau < taus_pf_p4().size(); itau++) {
-	  if(taus_pf_p4().at(itau).pt()<20) continue;
-	  // bool  isLeadLepton = 
-		if( dRbetweenVectors( taus_pf_p4().at(itau) , *lep1_ ) < 0.4 ) continue;
-		if( dRbetweenVectors( taus_pf_p4().at(itau) , *lep2_ ) < 0.4 ) continue;
-	  // if(isLeadLepton) continue;
-	  if(!taus_pf_byDecayModeFinding().at(itau)) continue;
-
-	  // isolation Medium ; pt > 20    
-	  if(taus_pf_byMediumIsolationMVA2().at(itau)) {
-		if(taus_pf_p4().at(itau).pt()>ptTauMax) {
-		  ptTauMax = taus_pf_p4().at(itau).pt();
-		  indexTauMax = itau;
-		}	
-	  }
-
-      if(indexTauMax!=-1) {
-		if(taus_pf_pfcandIndicies().at(indexTauMax).size()>0) {
-		  int leadingPtCand_index=(taus_pf_pfcandIndicies().at(indexTauMax)).at(0);
-		  pfTau_leadPtcand_= &(pfcands_p4().at(leadingPtCand_index));
-		  pfTau_leadPtcandID_= pfcands_particleId().at(leadingPtCand_index);
+		if( cms2.evt_isRealData() ) {
+		  ecallaser_ = passECALLaserFilter();
+		  csc_       = passCSCBeamHaloFilter();
+		  hbhe_      = cms2.evt_hbheFilter();
+		  hcallaser_ = passHCALLaserFilter();
+		  ecaltp_    = passECALDeadCellFilter();
+		  trkfail_   = passTrackingFailureFilter();
+		  eebadsc_   = passeeBadScFilter();
+		  hbhenew_   = passHBHEFilter();
+		}else{
+		  ecallaser_ = 1;
+		  csc_       = 1;
+		  hbhe_      = 1;
+		  hcallaser_ = 1;
+		  ecaltp_    = 1;
+		  trkfail_   = 1;
+		  eebadsc_   = 1;
+		  hbhenew_   = 1;
 		}
-      }
-	}
+
+		//-------------------------
+		// Taus
+		//-------------------------
+
+		Int_t indexTauMax = -1;
+		Float_t ptTauMax = 0.0;
+
+		for (unsigned int itau=0; itau < taus_pf_p4().size(); itau++) {
+		  if(taus_pf_p4().at(itau).pt()<20) continue;
+		  // bool  isLeadLepton = 
+		  if( dRbetweenVectors( taus_pf_p4().at(itau) , *lep1_ ) < 0.4 ) continue;
+		  if( dRbetweenVectors( taus_pf_p4().at(itau) , *lep2_ ) < 0.4 ) continue;
+		  // if(isLeadLepton) continue;
+		  if(!taus_pf_byDecayModeFinding().at(itau)) continue;
+	  
+		  // isolation Medium ; pt > 20    
+		  if(taus_pf_byMediumIsolationMVA2().at(itau)) {
+			if(taus_pf_p4().at(itau).pt()>ptTauMax) {
+			  ptTauMax = taus_pf_p4().at(itau).pt();
+			  indexTauMax = itau;
+			}	
+		  }
+	  
+		  if(indexTauMax!=-1) {
+			if(taus_pf_pfcandIndicies().at(indexTauMax).size()>0) {
+			  int leadingPtCand_index=(taus_pf_pfcandIndicies().at(indexTauMax)).at(0);
+			  pfTau_leadPtcand_= &(pfcands_p4().at(leadingPtCand_index));
+			  pfTau_leadPtcandID_= pfcands_particleId().at(leadingPtCand_index);
+			}
+		  }
+		}
+
+	  }
+	catch (exception& e)	
+	  {
+		cout<<e.what()<<endl;
+		cout<<"problem with the tau or mlbmetfilter vars."<<endl;
+	  }
 
 	//-------------------------
 	// fill histos and ntuple
 	//-------------------------
-
-	FillBabyNtuple();
+	try
+	  {
+		FillBabyNtuple();
+	  }
+	catch (exception& e)	
+	  {
+		cout<<e.what()<<endl;
+		cout<<"problem with FillBabyNtuple()."<<endl;
+	  }
 
 	//-----------------------
 	//signal region selection
