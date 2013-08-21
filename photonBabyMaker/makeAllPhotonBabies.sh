@@ -1,31 +1,28 @@
 #! /bin/bash
 
-# function processsample
-# {
-# dataset=$1
-# isdata=$2
-# echo "" > log/${dataset}.txt 2>&1 
-# echo "Processing root -b -q \"doAll_makePhotonBabies.C (\"$dataset\", $isdata)\""
-# echo "Output located in log/$dataset.txt"
-# root -b -q "doAll_makePhotonBabies.C (\"$dataset\", $isdata)" > log/${dataset}.txt 2>&1 &
-# sleep 120
-# }
-
 . makePhotonBaby.sh
+
+versionnumber="V00-02-21"
+
+make -j5
+if [ ! "$?" -eq "0" ]; then
+	echo "Did not Compile, Exiting"
+	exit
+fi
 
 # processsample zjetsmc_ee false
 # processsample zjetsmc_mm false
 
-processsample photon_15 false
-processsample photon_30 false
-processsample photon_50 false
-processsample photon_80 false
-processsample photon_120 false
-processsample photon_170 false
-processsample photon_300 false
-processsample photon_470 false
-processsample photon_800 false
-processsample photon_1400 false
+processsample photon_15 false $versionnumber
+# processsample photon_30 false
+# processsample photon_50 false
+# processsample photon_80 false
+# processsample photon_120 false
+# processsample photon_170 false
+# processsample photon_300 false
+# processsample photon_470 false
+# processsample photon_800 false
+# processsample photon_1400 false
 
 # echo "Processing root -b -q \"doAll_makePhotonBabies.C (\"ttbar_flmc_53X\", false)\""
 # echo "Output located in log/ttbar_flmc_53X.txt"

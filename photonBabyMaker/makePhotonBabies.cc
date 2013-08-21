@@ -1,9 +1,9 @@
-#include "makePhotonBabies.h"
 #include <algorithm>
 #include <iostream>
 #include <vector>
 #include <math.h>
 #include <fstream>
+#include <sstream>
 #include <set>
 
 #include "TChain.h"
@@ -15,7 +15,9 @@
 #include "TMath.h"
 #include "TProfile.h"
 #include "TDatabasePDG.h"
-#include <sstream>
+#include "Math/LorentzVector.h"
+#include "Math/VectorUtil.h"
+#include "TLorentzVector.h"
 
 #include "../CORE/CMS2.h"
 #ifndef __CINT__
@@ -37,25 +39,31 @@
 #include "../CORE/susySelections.h"
 #include "../CORE/mcSUSYkfactor.h"
 #include "../CORE/SimpleFakeRate.h"
+
 #include "../Tools/goodrun.h"
 #include "../Tools/vtxreweight.h"
 #include "../Tools/bTagEff_BTV.h"
+
+#include "../CORE/jetcorr/FactorizedJetCorrector.h"
+#include "../CORE/jetcorr/JetCorrectionUncertainty.h"
 #endif
 
-#include "Math/LorentzVector.h"
-#include "Math/VectorUtil.h"
-#include "TLorentzVector.h"
+#include "makePhotonBabies.h"
+#include "../looperTools/histtools.h"
+#include "../looperTools/commonLooperUtils.h"
 
 using namespace tas;
-class FactorizedJetCorrector;
+
+makePhotonBabies::makePhotonBabies( string iteration = "" ) 
+{
+  iter = iteration;
+};
 
 //--------------------------------------------------------------------
 
 const bool debug                = false;
 const float lumi                = 1.0;
-const char* iter                = "V00-02-06";
-// const char* jsonfilename        = "../jsons/Cert_190456-208686_8TeV_PromptReco_Collisions12_JSON_goodruns.txt";
-const char* jsonfilename        = "/home/users/benhoob/ZMet2012/jsons/Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt";
+const char* jsonfilename        = "../jsons/Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt";
 
 // https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1968.html   19.3 fb-1
 
@@ -109,7 +117,7 @@ float makePhotonBabies::dRGenJet ( LorentzVector p4, bool isData, float ptcut ) 
 
   float mindr = 999;
 
-  for( int i = 0 ; i < genjets_p4().size() ; i++){
+  for( size_t i = 0 ; i < genjets_p4().size() ; i++){
 
     // require genjet pt > ptcut
     if( genjets_p4().at(i).pt() < ptcut ) continue;
@@ -210,9 +218,9 @@ double dRbetweenVectors(const LorentzVector &vec1,
 
 //--------------------------------------------------------------------
 
-int makePhotonBabies::passThisHLTTrigger( char* hltname ){
+int makePhotonBabies::passThisHLTTrigger( string hltname ){
 
-  if( debug) cout << "Checking for pattern " << hltname << endl;
+  if( debug ) cout << "Checking for pattern " << hltname << endl;
 
   //-------------------------------------------------------
   // First check if trigger is present. If not, return -1.
@@ -221,8 +229,8 @@ int makePhotonBabies::passThisHLTTrigger( char* hltname ){
   bool    foundTrigger  = false;
   TString exact_hltname = "";
 
-  for( unsigned int itrig = 0 ; itrig < hlt_trigNames().size() ; ++itrig ){
-    if( TString( hlt_trigNames().at(itrig) ).Contains( hltname ) ){
+  for( size_t itrig = 0 ; itrig < hlt_trigNames().size() ; ++itrig ){
+    if( TString( hlt_trigNames().at(itrig) ).Contains( hltname.c_str() ) ){
       foundTrigger  = true;
       exact_hltname = hlt_trigNames().at(itrig);
       break;
@@ -262,8 +270,9 @@ int makePhotonBabies::passThisHLTTrigger( char* hltname ){
 void makePhotonBabies::ScanChain (TChain* chain, const char* prefix, bool isData, 
                                   bool calculateTCMET, int nEvents, float kFactor){
 
+  cout << "version : " << iter         << endl;
+  cout << "json    : " << jsonfilename << endl;
   set_goodrun_file( jsonfilename );
-  cout << "Using json " << jsonfilename << endl;
 
   //------------------------------------------------------------------------------------------------------
   // load here the on-the-fly corrections/uncertainties L1FastL2L3 (MC) and L1FastL2L3Residual (DATA)
@@ -271,7 +280,7 @@ void makePhotonBabies::ScanChain (TChain* chain, const char* prefix, bool isData
   // uncertainties are stored in pfUncertainty
   //------------------------------------------------------------------------------------------------------
 
-  std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3;
+  vector<string> jetcorr_filenames_pfL1FastJetL2L3;
   FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3;
 
   jetcorr_filenames_pfL1FastJetL2L3.clear();
@@ -281,8 +290,8 @@ void makePhotonBabies::ScanChain (TChain* chain, const char* prefix, bool isData
   //char* mcJEC   = "DESIGN42_V17";
 
   // new 52X
-  char* dataJEC = "GR_R_52_V9";
-  char* mcJEC   = "START52_V9B";
+  string dataJEC = "GR_R_52_V9";
+  string mcJEC   = "START52_V9B";
 
   if ( TString(prefix).Contains("data") ) {
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/GR_R_42_V23_AK5PF_L1FastJet.txt");
@@ -290,10 +299,10 @@ void makePhotonBabies::ScanChain (TChain* chain, const char* prefix, bool isData
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/GR_R_42_V23_AK5PF_L3Absolute.txt");
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/GR_R_42_V23_AK5PF_L2L3Residual.txt");
 
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L1FastJet_AK5PF.txt"    , dataJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L2Relative_AK5PF.txt"   , dataJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L3Absolute_AK5PF.txt"   , dataJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L2L3Residual_AK5PF.txt" , dataJEC ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L1FastJet_AK5PF.txt"    , dataJEC.c_str() ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2Relative_AK5PF.txt"   , dataJEC.c_str() ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L3Absolute_AK5PF.txt"   , dataJEC.c_str() ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2L3Residual_AK5PF.txt" , dataJEC.c_str() ));
     // pfUncertaintyFile = Form("jetCorrections/%s_Uncertainty_AK5PF.txt",dataJEC );
   } 
   else {
@@ -301,9 +310,9 @@ void makePhotonBabies::ScanChain (TChain* chain, const char* prefix, bool isData
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/DESIGN42_V17_AK5PF_L2Relative.txt");
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/DESIGN42_V17_AK5PF_L3Absolute.txt");
 
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L1FastJet_AK5PF.txt"  , mcJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L2Relative_AK5PF.txt" , mcJEC ));
-    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_L3Absolute_AK5PF.txt" , mcJEC ));    
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L1FastJet_AK5PF.txt"  , mcJEC.c_str() ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L2Relative_AK5PF.txt" , mcJEC.c_str() ));
+    jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("../jetCorrections/%s_L3Absolute_AK5PF.txt" , mcJEC.c_str() ));    
     // pfUncertaintyFile = Form("jetCorrections/%s_Uncertainty_AK5PF.txt",mcJEC );
   }
 
@@ -319,7 +328,7 @@ void makePhotonBabies::ScanChain (TChain* chain, const char* prefix, bool isData
   // make a baby ntuple
   //---------------------
   
-  MakeBabyNtuple( Form("../photon_output/%s/%s_baby.root", iter , prefix ) );
+  MakeBabyNtuple( Form("../photon_output/%s/%s_baby.root", iter.c_str() , prefix ) );
 
   TObjArray *listOfFiles = chain->GetListOfFiles();
 
@@ -917,28 +926,6 @@ void makePhotonBabies::ScanChain (TChain* chain, const char* prefix, bool isData
 
 //--------------------------------------------------------------------
 
-float makePhotonBabies::deltaPhi( float phi1 , float phi2){
-  float dphi = fabs( phi1 - phi2 );
-  if( dphi > TMath::Pi() ) dphi = TMath::TwoPi() - dphi;
-  return dphi;
-}
-
-//--------------------------------------------------------------------
-
-void makePhotonBabies::fillUnderOverFlow(TH1F *h1, float value, float weight){
-
-  float min = h1->GetXaxis()->GetXmin();
-  float max = h1->GetXaxis()->GetXmax();
-
-  if (value > max) value = h1->GetBinCenter(h1->GetNbinsX());
-  if (value < min) value = h1->GetBinCenter(1);
-
-  h1->Fill(value, weight);
-
-}
-
-//--------------------------------------------------------------------
-
 void makePhotonBabies::InitBabyNtuple (){
 
   pujets_.clear();
@@ -1151,37 +1138,79 @@ void makePhotonBabies::bookHistos(){
   hgenps_pthat->GetXaxis()->SetTitle("gen p_{T}(hat) (GeV)");
   hphotonpt->GetXaxis()->SetTitle("max photon p_{T} (GeV)");
 
-  char* pttitle[5]={"all jets","1 jet","2 jet","3 jet","#geq 4 jet"};
+  vector <string> pttitle;
+  pttitle.push_back("all jets");
+  pttitle.push_back("1 jet");
+  pttitle.push_back("2 jet");
+  pttitle.push_back("3 jet");
+  pttitle.push_back("#geq 4 jet");
+  // char* pttitle[5]={"all jets","1 jet","2 jet","3 jet","#geq 4 jet"};
 
-  for( int iJ = 0 ; iJ < 5 ; iJ++ ){
-    hetg[iJ] = new TH1F(Form("hetg_%i",iJ),pttitle[iJ],200,0,200);
-    hetg[iJ]->GetXaxis()->SetTitle("photon p_{T} (GeV)");
-  }
+  vector <string> leptype;
+  leptype.push_back("ee");  
+  leptype.push_back("mm");  
+  leptype.push_back("em");  
+  leptype.push_back("all");  
+  // char* leptype[4]   = {"ee", "mm", "em", "all"};
 
-  char* leptype[4]   = {"ee", "mm", "em", "all"};
-  char* jetbin[4]    = {"0j", "1j", "geq2j", "allj"};
+  vector <string> jetbin;
+  jetbin.push_back("0j");  
+  jetbin.push_back("1j");  
+  jetbin.push_back("geq2j");  
+  jetbin.push_back("allj");  
+  // char* jetbin[4]    = {"0j", "1j", "geq2j", "allj"};
 
-  char* leptype_title[4]   = {"ee", "#mu#mu", "e#mu", "all leptons"};
-  char* jetbin_title[4]    = {"0 jets", "1 jet", "#geq 2 jets", "all jets"};
+  vector <string> leptype_title;
+  leptype_title.push_back("ee");  
+  leptype_title.push_back("#mu#mu");  
+  leptype_title.push_back("e#mu");  
+  leptype_title.push_back("all leptons");  
+  // char* leptype_title[4]   = {"ee", "#mu#mu", "e#mu", "all leptons"};
 
-  for (int i = 0; i < 4; i++) {
-   
-    hdilMass[i] = new TH1F(Form("hdilMass_%s",leptype[i]),  leptype_title[i],   150,0,300);
-    hdilMass[i]->GetXaxis()->SetTitle("M(ll) (GeV)");
+  vector <string> jetbin_title;
+  jetbin_title.push_back("0 jets");  
+  jetbin_title.push_back("1 jet");  
+  jetbin_title.push_back("#geq 2 jets");  
+  jetbin_title.push_back("all jets");  
+  // char* jetbin_title[4]    = {"0 jets", "1 jet", "#geq 2 jets", "all jets"};
+
+  try
+	{
+	  for( size_t iJ = 0 ; iJ < pttitle.size() ; iJ++ ){
+		hetg[iJ] = new TH1F(Form("hetg_%i", (int)iJ ),pttitle.at(iJ).c_str(),200,0,200);
+		hetg[iJ]->GetXaxis()->SetTitle("photon p_{T} (GeV)");
+	  }
+
+	  for( size_t i = 0; i < leptype.size(); i++) {
+   		hdilMass[i] = new TH1F(Form("hdilMass_%s",leptype.at(i).c_str()),  leptype_title.at(i).c_str(),   150,0,300);
+		hdilMass[i]->GetXaxis()->SetTitle("M(ll) (GeV)");
  
-    for (int j = 0; j < 4; j++) {
+		for( size_t j = 0; j < leptype.size(); j++) {
+		  string suffix       = Form("%s_%s",leptype.at(i).c_str(),jetbin.at(j).c_str());
+		  string suffix_title = Form("%s %s",leptype_title.at(i).c_str(),jetbin_title.at(j).c_str());    
+		  htcmet[i][j]    = new TH1F(Form("htcmet_%s",suffix.c_str()),    suffix_title.c_str(), 100,0,100);
+		  htcmetNew[i][j] = new TH1F(Form("htcmetNew_%s",suffix.c_str()), suffix_title.c_str(), 100,0,100);
+		  hpfmet[i][j]    = new TH1F(Form("hpfmet_%s",suffix.c_str()),    suffix_title.c_str(), 100,0,100);
+		  htcmet[i][j]->GetXaxis()->SetTitle("tcmet (GeV)");
+		  htcmetNew[i][j]->GetXaxis()->SetTitle("tcmetNew (GeV)");
+		  hpfmet[i][j]->GetXaxis()->SetTitle("pfmet (GeV)");
+		}
+	  }
+	}
 
-      char* suffix       = Form("%s_%s",leptype[i],jetbin[j]);
-      char* suffix_title = Form("%s %s",leptype_title[i],jetbin_title[j]);
-    
-      htcmet[i][j]    = new TH1F(Form("htcmet_%s",suffix),    suffix_title, 100,0,100);
-      htcmetNew[i][j] = new TH1F(Form("htcmetNew_%s",suffix), suffix_title, 100,0,100);
-      hpfmet[i][j]    = new TH1F(Form("hpfmet_%s",suffix),    suffix_title, 100,0,100);
-      htcmet[i][j]->GetXaxis()->SetTitle("tcmet (GeV)");
-      htcmetNew[i][j]->GetXaxis()->SetTitle("tcmetNew (GeV)");
-      hpfmet[i][j]->GetXaxis()->SetTitle("pfmet (GeV)");
-    }
-  }
+  catch (exception& e)	
+	{
+	  cout<<e.what()<<endl;
+	  cout<<"Problem before line: "<<__LINE__<<endl;
+	  cout<<"problem with setting hist titles."<<endl;
+	}
+
+  // char* leptype[4]   = {"ee", "mm", "em", "all"};
+  // char* jetbin[4]    = {"0j", "1j", "geq2j", "allj"};
+
+  // char* leptype_title[4]   = {"ee", "#mu#mu", "e#mu", "all leptons"};
+  // char* jetbin_title[4]    = {"0 jets", "1 jet", "#geq 2 jets", "all jets"};
+
 }
  
 //--------------------------------------------------------------------

@@ -12,7 +12,7 @@
 #pragma link C++ nestedtypedef;
 
 // classes
-#pragma link C++ class Z_looper+;
+#pragma link C++ class makePhotonBabies+;
 // #pragma link C++ struct DorkyEventIdentifier+;
 
 #endif // __CINT__

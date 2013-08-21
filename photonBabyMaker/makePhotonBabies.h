@@ -1,23 +1,25 @@
 #ifndef makephotonbabies_h
 #define makephotonbabies_h
 
+#include <vector>
+#include <fstream>
+
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1.h"
-#include <vector>
-#include <fstream>
+#include "TChain.h"
 #include "Math/LorentzVector.h"
 
-typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
-typedef vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > VofP4;
-
-class TChain;
 class FactorizedJetCorrector;
+class JetCorrectionUncertainty;
+
+typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
+typedef std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > VofP4;
 
 class makePhotonBabies
 {
  public:
-  makePhotonBabies() {};
+  makePhotonBabies( std::string iteration );
   ~makePhotonBabies() {
     delete babyFile_;
     delete babyTree_;
@@ -34,14 +36,14 @@ class makePhotonBabies
                   int nEvents = -1, float kFactor = 1.);
   void  bookHistos();
   bool  isGoodTrack(int, bool usePV = false);
-  float deltaPhi( float phi1 , float phi2);
-  void  fillUnderOverFlow(TH1F *h1, float value, float weight);
   void  fillHistos(TH1F *h1[4],    float value, float weight, int myType);
   void  fillHistos(TH1F *h1[4][4], float value, float weight, int myType, int nJetsIdx);
-  int   passThisHLTTrigger( char* hltname );
+  int   passThisHLTTrigger( std::string hltname );
         
  private:
         
+  std::string iter;
+
   //ntuple, file
   TFile *babyFile_;
   TTree *babyTree_;

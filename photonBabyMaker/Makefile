@@ -44,10 +44,11 @@ $(rootdict): $(headers)
 
 lib := libmakePhotonBabies.so
 
-sources := $(cms2_tools)/goodrun.cc            \
-		   $(cms2_tools)/vtxreweight.cc        \
-		   $(cms2_tools)/bTagEff_BTV.cc        \
-		   $(cwelke_tools)/histtools.cc        \
+sources := $(cms2_tools)/goodrun.cc             \
+		   $(cms2_tools)/vtxreweight.cc         \
+		   $(cms2_tools)/bTagEff_BTV.cc         \
+		   $(cwelke_tools)/histtools.cc         \
+		   $(cwelke_tools)/commonLooperUtils.cc \
 		   makePhotonBabies.cc
 
 

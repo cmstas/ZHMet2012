@@ -1,18 +1,21 @@
+#include <string>
 #include "TChain.h"
-#include "makePhotonBabies.C"
+#include "TROOT.h"
 
+using namespace std;
 
-void pickSkimIfExists( TChain *ch, const std::string& base )
+void doAllPhotonBabies( string prefix = "", string ntuplenumber = "", bool isData = false, float kFactor = 1.0, string version = "" );
+void pickSkimIfExists( TChain *ch, const string& base )
 {
 
   TChain *dummy = new TChain("Events");
   int nFiles = 0;
   if (dummy->Add(base.c_str())) {
     nFiles = ch->Add(base.c_str());
-    std::cout << "Main " <<base.c_str() << " exists: use it. Loaded " 
-              << nFiles << " files" << std::endl;
+	cout << "Main " <<base.c_str() << " exists: use it. Loaded " 
+		 << nFiles << " files" << endl;
   } else{
-    std::cout << "Didn't find sample " << base << " , quitting" << std::endl;
+    cout << "Didn't find sample " << base << " , quitting" << endl;
     exit(0);
   }
 
@@ -26,116 +29,107 @@ void pickSkimIfExists( TChain *ch, const std::string& base )
   return;
 }
 
+int runMakePhotonBabies( string fileprefix = "", string ntuplenumber = "", bool isData = false, string version = "" )
+{
 
-void runMakePhotonBabies(char* prefix , bool isData = true, float kFactor = 1.){
+  string cms2path = "../CORE/libCMS2NtupleMacrosCORE.so";
+  cout<<"loading cms2 from: "<<cms2path<<endl;
+  gROOT->ProcessLine(Form(".L %s", cms2path.c_str() ));
+  cout<<"loading local libs: libmakePhotonBabies.so"<<endl;
+  gROOT->ProcessLine(".L libmakePhotonBabies.so");
+
+  doAllPhotonBabies( fileprefix.c_str(), ntuplenumber.c_str(), isData, 1., version.c_str() );
+
+  return 0;
+}
+
+void doAllPhotonBabies( string prefix, string ntuplenumber, bool isData, float kFactor, string version )
+{
+
+
+  cout<<"Getting sample:"<<endl;
 
   TChain* ch = new TChain("Events");
 
   //-----------------------------------------------------------------------------------
 
-  if( strcmp( prefix , "data_53X_2012A" ) == 0 ){    
-    //pickSkimIfExists(ch,"PhotonTriggerSkim_slim/DoubleElectron_Run2012A-13Jul2012-v1_AOD/V05-03-18_slim/merged_ntuple_999999_9_1_skim.root");
-    // pickSkimIfExists(ch,"PhotonTriggerSkim_slim/DoubleElectron_Run2012A-13Jul2012-v1_AOD/V05-03-18_slim/merged*root");
-    // pickSkimIfExists(ch,"PhotonTriggerSkim_slim/DoubleElectron_Run2012A-recover-06Aug2012-v1_AOD/V05-03-18_slim/merged*root");
+  if( prefix == "data_53X_2012A" ){    
     pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012A-13Jul2012-v1_AOD/merged/merged_ntuple_*.root");
     pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012A-recover-06Aug2012-v1_AOD/merged/merged*.root");
   }
 
   //-----------------------------------------------------------------------------------
 
-  else if( strcmp( prefix , "data_53X_2012B" ) == 0 ){    
-    // pickSkimIfExists(ch,"PhotonTriggerSkim_slim/DoubleElectron_Run2012B-13Jul2012-v1_AOD/V05-03-18_slim/merged*root");
+  else if( prefix == "data_53X_2012B" ){    
     pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012B-13Jul2012-v1_AOD/merged/merged*.root");
   }
 
   //-----------------------------------------------------------------------------------
 
-  else if( strcmp( prefix , "data_53X_2012C" ) == 0 ){    
-    // pickSkimIfExists(ch,"PhotonTriggerSkim_slim/DoubleElectron_Run2012C-24Aug2012-v1_AOD/V05-03-18_slim/merged*root");
-    // pickSkimIfExists(ch,"PhotonTriggerSkim_slim/DoubleElectron_Run2012C-PromptReco-v2_AOD/V05-03-18_slim/merged*root");
+  else if( prefix == "data_53X_2012C" ){    
     pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-24Aug2012-v1_AOD/merged/merged*root");
     pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-PromptReco-v2_AOD/merged/merged*root");
   }
 
   //-----------------------------------------------------------------------------------
 
-  else if( strcmp( prefix , "data_53X_2012D" ) == 0 ){    
-    // pickSkimIfExists(ch,"PhotonTriggerSkim_slim/DoubleElectron_Run2012D-PromptReco-v1_AOD/V05-03-18_slim/merged*root");
+  else if( prefix == "data_53X_2012D" ){    
     pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012D-16Jan2013-v1_AOD/merged/merged*root");
     pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012D-PromptReco-v1_AOD/merged/merged*root");
   }
 
   //-----------------------------------------------------------------------------------
 
-  else if( strcmp( prefix , "ttbar_slmc_53X" ) == 0 ){    
+  else if( prefix == "ttbar_slmc_53X" ){    
     pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/TTJets_SemiLeptMGDecays_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A_ext-v1/V05-03-24/merged_ntuple_*.root");
   }
 
   //-----------------------------------------------------------------------------------
 
-  else if( strcmp( prefix , "ttbar_flmc_53X" ) == 0 ){    
+  else if( prefix == "ttbar_flmc_53X" ){    
     pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/TTJets_FullLeptMGDecays_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v2/V05-03-24/merged_ntuple_*.root");
   }
 
   //-----------------------------------------------------------------------------------
 
-  else if( strcmp( prefix , "Photon" ) == 0 ){
-    pickSkimIfExists(ch,"/hadoop/cms/store/user/cwelke/CMSSW_5_2_3_patch4_V05-02-27/Photon_Run2012A-PromptReco-v1_AOD/unmerged/store*root");
-    pickSkimIfExists(ch,"/hadoop/cms/store/user/cwelke/CMSSW_5_2_3_patch4_V05-02-27/SinglePhoton_Run2012B-PromptReco-v1_AOD/unmerged/store*root");
+  else if( prefix == "photon_15" ){
+    pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-15to30_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_1.root");
   }
-
-  else if( strcmp( prefix ,"photon_15" ) == 0 ){
-    pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-15to30_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*.root");
-  }
-  else if( strcmp( prefix ,"photon_30" ) == 0 ){
+  else if( prefix == "photon_30" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-30to50_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*.root");
   }
-  else if( strcmp( prefix ,"photon_50" ) == 0 ){
+  else if( prefix == "photon_50" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-50to80_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*.root");
   }
-  else if( strcmp( prefix ,"photon_80" ) == 0 ){
+  else if( prefix == "photon_80" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-80to120_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*.root");
   }
-  else if( strcmp( prefix ,"photon_120" ) == 0 ){
+  else if( prefix == "photon_120" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-120to170_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*.root");
   }
-  else if( strcmp( prefix ,"photon_170" ) == 0 ){
+  else if( prefix == "photon_170" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-170to300_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*.root");
   }
-  else if( strcmp( prefix ,"photon_300" ) == 0 ){
+  else if( prefix == "photon_300" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-300to470_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*.root");
   }
-  else if( strcmp( prefix ,"photon_470" ) == 0 ){
+  else if( prefix == "photon_470" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-470to800_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*.root");
   }
-  else if( strcmp( prefix ,"photon_800" ) == 0 ){
+  else if( prefix == "photon_800" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-800to1400_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*.root");
   }
-  else if( strcmp( prefix ,"photon_1400" ) == 0 ){
+  else if( prefix == "photon_1400" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/G_Pt-1400to1800_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*.root");
   }
 
   //-----------------------------------------------------------------------------------
 
-  else if( strcmp( prefix ,"zjetsmc_ee" ) == 0 ){
+  else if( prefix == "zjetsmc_ee" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/DYToEE_M-20_CT10_TuneZ2star_v2_8TeV-powheg-pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*");
   }
-  else if( strcmp( prefix ,"zjetsmc_mm" ) == 0 ){
+  else if( prefix == "zjetsmc_mm" ){
 	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/DYToMuMu_M-20_CT10_TuneZ2star_v2_8TeV-powheg-pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*");
-	  }
-
-  else if( strcmp( prefix , "DoubleElectron" ) == 0 ){
-    pickSkimIfExists(ch,"PhotonTriggerSkim/DoubleElectron_Run2012A-13Jul2012-v1_AOD/V05-03-13/merged*root");
-    pickSkimIfExists(ch,"PhotonTriggerSkim/DoubleElectron_Run2012A-recover-06Aug2012-v1_AOD/V05-03-13/merged*root");
-    pickSkimIfExists(ch,"PhotonTriggerSkim/DoubleElectron_Run2012B-13Jul2012-v1_AOD/V05-03-13/merged*root");
-    pickSkimIfExists(ch,"PhotonTriggerSkim/DoubleElectron_Run2012C-PromptReco-v1_AOD/V05-03-13/merged*root");
-    pickSkimIfExists(ch,"PhotonTriggerSkim/DoubleElectron_Run2012C-PromptReco-v2_AOD/V05-03-13/merged*root");
-  }
-  
-  //-----------------------------------------------------------------------------------
-
-  else if( strcmp( prefix , "DoubleElectron_2012Cv2" ) == 0 ){
-    pickSkimIfExists(ch,"PhotonTriggerSkim/DoubleElectron_Run2012C-PromptReco-v2_AOD/V05-03-13/merged*root");
   }
   
   //-----------------------------------------------------------------------------------
@@ -155,10 +149,18 @@ void runMakePhotonBabies(char* prefix , bool isData = true, float kFactor = 1.){
   ch->Draw("evt_run");
   cout << endl;
   
-  makePhotonBabies* myLooper = new makePhotonBabies();
+  try
+	{
+	  makePhotonBabies* myLooper = new makePhotonBabies( version.c_str() );
   
-  cout << "Running on sample " << prefix << endl;
-  myLooper->ScanChain(ch, prefix, isData, calculateTCMET, -1 ,kFactor);
+	  cout << "Running on sample " << prefix << endl;
+	  myLooper->ScanChain(ch, prefix.c_str(), isData, calculateTCMET, -1 ,kFactor);
+	}
+  catch (exception& e)	
+  	{
+  	  cout<<e.what()<<endl;
+  	  cout << "Problem running looper." << endl;		
+	}  
   
 }
 
