@@ -10,10 +10,10 @@ if [ ! -d log/${versionnumber} ]; then
 	mkdir -p log/${versionnumber}
 	didMakeDir=$?
 else
-	echo "log/${versionnumber} Already exists! Output located in log/${versionnumber}/$dataset.txt"
+	echo "log/${versionnumber} Already exists! Output located in log/${versionnumber}/$dataset_${percentage}.txt"
 fi
 if [ "$didMakeDir" == "0" ]; then
-	echo "log/${versionnumber} created successfully.Output located in log/${versionnumber}/$dataset.txt"
+	echo "log/${versionnumber} created successfully.Output located in log/${versionnumber}/$dataset_${percentage}.txt"
 fi
 
 if [ ! -d ../photon_output/${versionnumber} ]; then
@@ -21,13 +21,13 @@ if [ ! -d ../photon_output/${versionnumber} ]; then
 	mkdir -p ../photon_output/${versionnumber}
 	didMakeDir=$?
 else
-	echo "../photon_output/${versionnumber} Already exists! Output located in ../output/${versionnumber}/$dataset.txt"
+	echo "../photon_output/${versionnumber} Already exists! Output located in ../photon_output/${versionnumber}/$dataset_${percentage}.root"
 fi
 if [ "$didMakeDir" == "0" ]; then
-	echo "../photon_output/${versionnumber} created successfully.Output located in ../output/${versionnumber}/$dataset.txt"
+	echo "../photon_output/${versionnumber} created successfully.Output located in ../photon_output/${versionnumber}/$dataset_${percentage}.root"
 fi
 
 echo "Processing root -b -q \"runZlooper.cc (\"$dataset\", \"$percentage\", $isdata, \"$versionnumber\")\""
-root -b -q "runMakePhotonBabies.cc (\"$dataset\", \"$percentage\", $isdata, \"$versionnumber\" )" > log/${versionnumber}/${dataset}.txt 2>&1 &
+root -b -q "runMakePhotonBabies.cc (\"$dataset\", \"$percentage\", $isdata, \"$versionnumber\" )" > log/${versionnumber}/${dataset}_${percentage}.txt 2>&1 &
 # sleep 5
 }
