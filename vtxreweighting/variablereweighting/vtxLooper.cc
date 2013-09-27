@@ -261,6 +261,8 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 	  // isdata = true;
 	}
 	
+    bool isttbar = TString(currentFile->GetTitle()).Contains("ttbar_");
+
 	// Get File Content
 	TFile *file = new TFile( currentFile->GetTitle() );
 	TTree *tree = (TTree*)file->Get("T1");
@@ -297,23 +299,24 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
       if( templates.maxleppt() > 20.0 )                                     continue; // veto leptons pt > 20 GeV
       if( acos( cos( templates.phig() - templates.pfmetphi() ) ) < 0.14 )   continue; // kill photons aligned with MET
 
-      if( isdata && !(templates.csc()==0 && 
-	  				  templates.hbhe()==1 && 
-	  				  templates.hcallaser()==1 && 
-	  				  templates.ecallaser()==1 && 
-	  				  templates.ecaltp()==1 && 
-	  				  templates.trkfail()==1 && 
-	  				  templates.eebadsc()==1 && 
-	  				  templates.hbhenew()==1) 
+      if( isdata && !isttbar && !(templates.csc()==0 && 
+								  templates.hbhe()==1 && 
+								  templates.hcallaser()==1 && 
+								  templates.ecallaser()==1 && 
+								  templates.ecaltp()==1 && 
+								  templates.trkfail()==1 && 
+								  templates.eebadsc()==1 && 
+								  templates.hbhenew()==1) 
 		  )                                                                 continue; // MET filters
-	  if( isdata && ( templates.hgg22() < 1 && 
-					  // templates.hgg36() < 1 && 
-					  templates.hgg50() < 1 && 
-					  templates.hgg75() < 1 && 
-					  templates.hgg90() < 1 )
+
+	  if( isdata && !isttbar && ( templates.hgg22() < 1 && 
+								  // templates.hgg36() < 1 && 
+								  templates.hgg50() < 1 && 
+								  templates.hgg75() < 1 && 
+								  templates.hgg90() < 1 )
 		  )                                                                 continue; // require trig
 
-	  if( isdata ){
+	  if( isdata && !isttbar ){
 		if(       templates.hgg90() >= 1 ){
 		  weight *= templates.hgg90();
 		}else if( templates.hgg75() >= 1 ){
@@ -325,7 +328,7 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 		}else if( templates.hgg22() >= 1 ){
 		  weight *= templates.hgg22();
 		}
-	  }else if( !isdata ){
+	  }else if( !isdata || isttbar ){
 		weight = templates.weight();
 		weight *= 19.5;
 	  }
@@ -334,7 +337,7 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 	  float csv1_nominal = templates.csv1();
 	  float csv2_nominal = templates.csv2();
 	  float csv3_nominal = templates.csv3();	  
-	  if( !isdata ){
+	  if( !isdata || isttbar ){
 	  	csv1_nominal=nominalShape->reshape(templates.jet1().Eta(), 
 	  									   templates.jet1().Pt(),
 	  									   templates.csv1(),
@@ -355,6 +358,7 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 	  csvvals.push_back(csv3_nominal);
 
 	  Float_t mjj = 0.0;
+	  Float_t csvproduct = 0.0;
 	  // Float_t mT2j = 0.0;
 
 	  if( !dobveto && !dotwobtag ){
@@ -363,6 +367,7 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 		jets.push_back(templates.jet2());
 		if( templates.njets() == 3 ){ jets.push_back(templates.jet3()); }
 		mjj = (jets.at(0) + jets.at(1)).mass();
+		csvproduct = templates.csv1()*templates.csv2();
 		// mT2j = getMT2b( leps, jets );
 
 	  }else if( dobveto && !dotwobtag ){
@@ -373,6 +378,7 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 		  jets.push_back(templates.jet2());
 		  if( templates.njets() == 3 ){ jets.push_back(templates.jet3()); }
 		  mjj = (jets.at(0) + jets.at(1)).mass();
+		  csvproduct = templates.csv1()*templates.csv2();
 		  // mT2j = getMT2b( leps, jets );
 		}else{ continue; }
 
@@ -381,6 +387,7 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 		Bool_t twogoodbs = getbjets( 0.244, csvvals );	  		
 		if( dotwobtag && twogoodbs ){
 		  mjj = (goodbs.at(0) + goodbs.at(1)).mass();
+		  csvproduct = get2btagproduct( 0.244, csvvals );
 		  // mT2j = getMT2b( leps, goodbs );
 		}else{ continue; }		
 
@@ -405,21 +412,36 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 	  // if( domt2jhi && mT2j < 200.0 )                 continue;
 	  // if( domt2jlo && mT2j > 200.0 )                 continue;
 
+	  vector <Float_t> mcfavals;
+	  Float_t mcfaproduct = 0.0;
+
+	  if( !isdata ){
+		mcfavals.push_back(templates.jet1mcfa());
+		mcfavals.push_back(templates.jet2mcfa());
+		mcfavals.push_back(templates.jet3mcfa());
+		mcfaproduct = get2btagmcfaproduct( 0.244, csvvals, mcfavals );
+	  if( dobveto ) mcfaproduct = templates.jet1mcfa()*templates.jet2mcfa();
+
+	  }
 
 	  if( runnumber == 0 ){
 		
-		if( !isdata ){
-		  if( abs(templates.jet1mcfa()) != 21 && abs(templates.jet1mcfa()) != 22 ) fillHist(photon_mcfabjet1, abs(templates.jet1mcfa()), weight);
-		  else if( abs(templates.jet1mcfa()) == 21 )                               fillHist(photon_mcfabjet1, 7, weight);
-		  else if( abs(templates.jet1mcfa()) == 22 )                               fillHist(photon_mcfabjet1, 8, weight);
-		  if( abs(templates.jet2mcfa()) != 21 && abs(templates.jet2mcfa()) != 22 ) fillHist(photon_mcfabjet2, abs(templates.jet2mcfa()), weight);
-		  else if( abs(templates.jet2mcfa()) == 21 )                               fillHist(photon_mcfabjet2, 7, weight);
-		  else if( abs(templates.jet2mcfa()) == 22 )                               fillHist(photon_mcfabjet2, 8, weight);
+		if( !isdata && !isttbar ){
+
+		  // if( templates.pfmet() > 100.0 ){
+			// fillmcfahists( 0.244, photon_mcfabjet1, photon_mcfabjet2, weight );
+			// }
+
+			if( abs(templates.jet1mcfa()) != 21 && abs(templates.jet1mcfa()) != 22 ) fillHist(photon_mcfabjet1, abs(templates.jet1mcfa()), weight);
+			else if( abs(templates.jet1mcfa()) == 21 )                               fillHist(photon_mcfabjet1, 7, weight);
+			else if( abs(templates.jet1mcfa()) == 22 )                               fillHist(photon_mcfabjet1, 8, weight);
+			if( abs(templates.jet2mcfa()) != 21 && abs(templates.jet2mcfa()) != 22 ) fillHist(photon_mcfabjet2, abs(templates.jet2mcfa()), weight);
+			else if( abs(templates.jet2mcfa()) == 21 )                               fillHist(photon_mcfabjet2, 7, weight);
+			else if( abs(templates.jet2mcfa()) == 22 )                               fillHist(photon_mcfabjet2, 8, weight);
+		  // }
+
 		  if( abs(templates.jet2mcfa()) == 5 ) fillHist(photon_metwithbs, templates.pfmet(), weight);
 		  if( abs(templates.jet2mcfa()) == 4 ) fillHist(photon_metwithcs, templates.pfmet(), weight);
-		  // if( templates.pfmet() > 80.0 ){
-		  // fillmcfahists( 0.244, photon_mcfabjet1, photon_mcfabjet2, weight );
-		  // }
 		}
 
 		fillHist( hgvar, templates.etg(), weight );
@@ -432,14 +454,17 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 	  }else if( runnumber == 1 ){
 		weight *= ptreweightHist->GetBinContent( min( ptreweightHist->FindBin( templates.etg() )
 													  , ptreweightHist->GetNbinsX() ) ); 
+		// if(      templates.njets() == 2 )		fillHist( hgvar, templates.jet1().pt() + templates.jet2().pt(), weight);
+		// else if( templates.njets() == 3 )		fillHist( hgvar, templates.jet1().pt() + templates.jet2().pt() + templates.jet3().pt(), weight);
 		fillHist( hgvar, templates.ht(),  weight );
 	  }else if( runnumber == 2 ){
-		weight *= ptreweightHist->GetBinContent( min( ptreweightHist->FindBin( templates.etg() )
-													  , ptreweightHist->GetNbinsX() ) ); 
+		// weight *= ptreweightHist->GetBinContent( min( ptreweightHist->FindBin( templates.etg() )
+		// 											  , ptreweightHist->GetNbinsX() ) ); 
 		weight *= htreweightHist->GetBinContent( min( htreweightHist->FindBin( templates.ht() )
 													  , htreweightHist->GetNbinsX() ) ); 
 
-		fillHist( hgmjj, mjj, weight );
+		// fillHist( hgmjj, mcfaproduct, weight);
+		fillHist( hgmjj, csvproduct, weight );
 		// fillHist( hgmjj, (templates.jet1() + templates.jet2()).mass(), weight );
 		// fillHist( hgmjj, (templates.jet1() + templates.jet2()).mass(), weight );
 	  }
@@ -587,7 +612,11 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 
 	
   TFile * zfile;
-  zfile = TFile::Open(Form("tempfiles/vtxreweight_DoubleElectron_19fb_MC%s_temp.root", selection.c_str() ), "READ");
+  if( !isdata ){
+	zfile = TFile::Open(Form("tempfiles/vtxreweight_DoubleElectron_19fb_MC%s_temp.root", selection.c_str() ), "READ");
+  }else{
+	zfile = TFile::Open(Form("tempfiles/vtxreweight_DoubleElectron_19fb_data%s_temp.root", selection.c_str() ), "READ");
+  }
 
   finalratio->cd();
   if( runnumber == 0 ){
@@ -598,15 +627,17 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 	hratio50 -> Write();
 	hratio70 -> Write();
 	hratio90 -> Write();
-	photon_mcfabjet1 -> Write();
-	photon_mcfabjet2 -> Write();
-	photon_metwithbs -> Write();
-	photon_metwithcs -> Write();
 
-	(TH1F*)zfile -> Get( "z_mcfabjet1" ) -> Write();
-	(TH1F*)zfile -> Get( "z_mcfabjet2" ) -> Write();
-	(TH1F*)zfile -> Get( "z_metwithbs" ) -> Write();
-	(TH1F*)zfile -> Get( "z_metwithcs" ) -> Write();
+	if( !isdata ){
+	  photon_mcfabjet1 -> Write();
+	  photon_mcfabjet2 -> Write();
+	  photon_metwithbs -> Write();
+	  photon_metwithcs -> Write();
+	  (TH1F*)zfile -> Get( "z_mcfabjet1" ) -> Write();
+	  (TH1F*)zfile -> Get( "z_mcfabjet2" ) -> Write();
+	  (TH1F*)zfile -> Get( "z_metwithbs" ) -> Write();
+	  (TH1F*)zfile -> Get( "z_metwithcs" ) -> Write();
+	}
 
   }else if( runnumber == 1 ){
 	(TH1F*)hgvar -> Clone("gHt") -> Write();
