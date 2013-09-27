@@ -200,103 +200,219 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
   //~-~-~-~-~-~-~-~-~-~-~-~-~-~//
   //control bins for variable reweighting
   if( skimFilePrefix == "closure_" ){
-	if( dotwobtag && !domjjhi && !domjjlo && !domt2jhi && !domt2jlo ){
-	  // setpthists( 2.0, 112.0 );
-	  // seththists( 90.0, 360.0 );
+  	if( dotwobtag && !domjjhi && !domjjlo && !domt2jhi && !domt2jlo ){
+  	  cout<<"2btag"<<endl;
+  	  // setpthists( 2.0, 112.0 );
+  	  // seththists( 90.0, 360.0 );
+  	  // setmjjhists( 40.0, 600.0 );
+  	  setpthists( 2.0, 662.0 );
+  	  seththists( 90.0, 1080.0 );
+  	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+  	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+  	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+  	  // hZMjj = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+  	  // hZMjjof = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+  	  // hZMjjsf = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+  	  hZMjj -> Sumw2();
+  	  hZMjjof -> Sumw2();
+  	  hZMjjsf -> Sumw2();
+  	  // setmjjhists( 40.0, 600.0 );
+  	}else if( dobveto && !domjjhi && !domjjlo && !domt2jhi && !domt2jlo ){
+  	  cout<<"bveto"<<endl;
+
+  	  setpthists( 2.0, 862.0 );
+  	  seththists( 90.0, 1440.0 );
+	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+	  // hZMjj = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+	  // hZMjjof = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+	  // hZMjjsf = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+	  hZMjj -> Sumw2();
+	  hZMjjof -> Sumw2();
+	  hZMjjsf -> Sumw2();
 	  // setmjjhists( 40.0, 600.0 );
-	  setpthists( 2.0, 262.0 );
-	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dotwobtag && !domjjhi && !domjjlo && domt2jhi ){
-	  setpthists( 2.0, 262.0 );
-	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dotwobtag && !domjjhi && !domjjlo && domt2jlo ){
-	  setpthists( 2.0, 162.0 );
-	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( !dotwobtag && !domjjhi && !domjjlo && !domt2jhi && !domt2jlo ){
-	  setpthists( 2.0, 262.0 );
-	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}
+  	}else if( dotwobtag && !domjjhi && !domjjlo && domt2jhi ){
+  	  cout<<"2btag high mt2j"<<endl;
+  	  setpthists( 2.0, 462.0 );
+  	  seththists( 90.0, 840.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}else if( dotwobtag && !domjjhi && !domjjlo && domt2jlo ){
+  	  cout<<"2btag low mt2j"<<endl;
+  	  setpthists( 2.0, 462.0 );
+  	  seththists( 90.0, 840.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}else if( !dotwobtag && !domjjhi && !domjjlo && !domt2jhi && !domt2jlo ){
+  	  cout<<"no two btag"<<endl;
+  	  setpthists( 2.0, 462.0 );
+  	  seththists( 90.0, 840.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}
 
-	if( dotwobtag && domjjhi && domt2jhi ){ 
-	  setpthists( 2.0, 262.0 );
-	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dotwobtag && domjjhi && domt2jlo ){
-	  setpthists( 2.0, 112.0 );
-	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dotwobtag && domjjlo && domt2jlo ){
-	  setpthists( 2.0, 112.0 );
-	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dotwobtag && domjjlo && domt2jhi ){
-	  setpthists( 2.0, 162.0 );
-	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
+  	if( dotwobtag && domjjhi && domt2jhi ){ 
+  	  cout<<__LINE__<<endl;
+  	  setpthists( 2.0, 462.0 );
+  	  seththists( 90.0, 840.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}else if( dotwobtag && domjjhi && domt2jlo ){
+  	  cout<<__LINE__<<endl;
+  	  setpthists( 2.0, 202.0 );
+  	  seththists( 90.0, 840.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}else if( dotwobtag && domjjlo && domt2jlo ){
+  	  cout<<__LINE__<<endl;
+  	  setpthists( 2.0, 262.0 );
+  	  seththists( 90.0, 840.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}else if( dotwobtag && domjjlo && domt2jhi ){
+  	  cout<<__LINE__<<endl;
+  	  setpthists( 2.0, 462.0 );
+  	  seththists( 90.0, 840.0 );
+  	  setmjjhists( 40.0, 600.0 );
 
-	}else if( dobveto && domjjhi && domt2jhi ){ 
-	  setpthists( 2.0, 262.0 );
-	  seththists( 90.0, 960.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dobveto && domjjlo && domt2jhi ){ 
-	  setpthists( 2.0, 262.0 );
-	  seththists( 90.0, 360.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dobveto && domjjhi && domt2jlo ){ 
-	  setpthists( 2.0, 137.0 );
-	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dobveto && domjjlo && domt2jlo ){ 
-	  setpthists( 2.0, 162.0 );
-	  seththists( 90.0, 360.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}
+  	}else if( dobveto && domjjhi && domt2jhi ){ 
+  	  cout<<__LINE__<<endl;
+  	  setpthists( 2.0, 462.0 );
+  	  seththists( 90.0, 840.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}else if( dobveto && domjjlo && domt2jhi ){ 
+  	  cout<<__LINE__<<endl;
+  	  setpthists( 2.0, 462.0 );
+  	  seththists( 90.0, 480.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}else if( dobveto && domjjhi && domt2jlo ){ 
+  	  cout<<__LINE__<<endl;
+  	  setpthists( 2.0, 212.0 );
+  	  seththists( 90.0, 840.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}else if( dobveto && domjjlo && domt2jlo ){ 
+  	  cout<<__LINE__<<endl;
+  	  setpthists( 2.0, 262.0 );
+  	  seththists( 90.0, 480.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}
   }else{ 
-  
-	if( dotwobtag && domjjhi && domt2jhi ){ 
+
+  	if( dotwobtag && !domjjhi && !domjjlo && !domt2jhi && !domt2jlo ){
+  	  cout<<"2btag"<<endl;
+  	  // setpthists( 2.0, 112.0 );
+  	  // seththists( 90.0, 360.0 );
+  	  // setmjjhists( 40.0, 600.0 );
+  	  setpthists( 2.0, 262.0 );
+  	  seththists( 90.0, 960.0 );
+  	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+  	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+  	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+  	  // hZMjj = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+  	  // hZMjjof = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+  	  // hZMjjsf = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+  	  hZMjj -> Sumw2();
+  	  hZMjjof -> Sumw2();
+  	  hZMjjsf -> Sumw2();
+  	  // setmjjhists( 40.0, 600.0 );
+  	}else if( dobveto && !domjjhi && !domjjlo && !domt2jhi && !domt2jlo ){
+  	  cout<<"bveto"<<endl;
+  	  setpthists( 2.0, 262.0 );
+  	  seththists( 90.0, 960.0 );
+	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 500, 0, 500 );
+	  // hZMjj = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+	  // hZMjjof = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+	  // hZMjjsf = new TH1F( "hZMjj", "hZMjj", 50, 0, 1. );
+	  hZMjj -> Sumw2();
+	  hZMjjof -> Sumw2();
+	  hZMjjsf -> Sumw2();
+	  // setmjjhists( 40.0, 600.0 );
+  	}else if( dotwobtag && !domjjhi && !domjjlo && domt2jhi ){
+  	  cout<<"2btag high mt2j"<<endl;
+  	  setpthists( 2.0, 262.0 );
+  	  seththists( 90.0, 960.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}else if( dotwobtag && !domjjhi && !domjjlo && domt2jlo ){
+  	  cout<<"2btag low mt2j"<<endl;
+  	  setpthists( 2.0, 262.0 );
+  	  seththists( 90.0, 960.0 );
+  	  setmjjhists( 40.0, 600.0 );
+
+  	}else if( dobveto && !domjjhi && !domjjlo && domt2jhi ){
+  	  cout<<"bveto high mt2j"<<endl;
+  	  setpthists( 2.0, 262.0 );
+  	  seththists( 90.0, 960.0 );
+  	  setmjjhists( 40.0, 600.0 );
+  	}else if( dobveto && !domjjhi && !domjjlo && domt2jlo ){
+  	  cout<<"bveto low mt2j"<<endl;
+  	  setpthists( 2.0, 262.0 );
+  	  seththists( 90.0, 960.0 );
+  	  setmjjhists( 40.0, 600.0 );
+
+	}else if( dotwobtag && domjjhi && domt2jhi ){ 
 	  setpthists( 2.0, 262.0 );
 	  seththists( 90.0, 960.0 );
-	  setmjjhists( 40.0, 600.0 );
+	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  // setmjjhists( 40.0, 600.0 );
 	}else if( dotwobtag && domjjhi && domt2jlo ){
 	  setpthists( 2.0, 112.0 );
 	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
+	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  // setmjjhists( 40.0, 600.0 );
 	}else if( dotwobtag && domjjlo && domt2jlo ){
 	  setpthists( 2.0, 112.0 );
 	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
+	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  // setmjjhists( 40.0, 600.0 );
 	}else if( dotwobtag && domjjlo && domt2jhi ){
 	  setpthists( 2.0, 162.0 );
 	  seththists( 90.0, 480.0 );
-	  setmjjhists( 40.0, 600.0 );
+	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
+	  // setmjjhists( 40.0, 600.0 );
 
-	}else if( dobveto && domjjhi && domt2jhi ){ 
-	  setpthists( 2.0, 262.0 );
-	  seththists( 90.0, 960.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dobveto && domjjlo && domt2jhi ){ 
-	  setpthists( 2.0, 262.0 );
-	  seththists( 90.0, 360.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dobveto && domjjhi && domt2jlo ){ 
-	  setpthists( 2.0, 212.0 );
-	  seththists( 90.0, 960.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}else if( dobveto && domjjlo && domt2jlo ){ 
-	  setpthists( 2.0, 162.0 );
-	  seththists( 90.0, 360.0 );
-	  setmjjhists( 40.0, 600.0 );
-	}
+  	}else if( dobveto && domjjhi && domt2jhi ){ 
+  	  setpthists( 2.0, 262.0 );
+  	  seththists( 90.0, 960.0 );
+	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+  	  // setmjjhists( 40.0, 600.0 );
+  	}else if( dobveto && domjjlo && domt2jhi ){ 
+  	  setpthists( 2.0, 262.0 );
+  	  seththists( 90.0, 360.0 );
+	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+  	  // setmjjhists( 40.0, 600.0 );
+  	}else if( dobveto && domjjhi && domt2jlo ){ 
+  	  setpthists( 2.0, 212.0 );
+  	  seththists( 90.0, 960.0 );
+	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+  	  // setmjjhists( 40.0, 600.0 );
+  	}else if( dobveto && domjjlo && domt2jlo ){ 
+  	  setpthists( 2.0, 162.0 );
+  	  seththists( 90.0, 360.0 );
+	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 25, 0, 0.06 );
+  	  // setmjjhists( 40.0, 600.0 );
+  	}
   }
+
   // //histos for vertex reweighting
   hZ = new TH1F("hZ","",35,0,35);
   hZ -> Sumw2();
   hZ -> Rebin(5);
-
+  hZMjj -> Sumw2();
+  hZMjjof -> Sumw2();
+  hZMjjsf -> Sumw2();
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
@@ -365,17 +481,40 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
 	  
 	  //filter inclusive dy sample
 	  if( !zmet.isdata() ){
-		if( basename == "zjets" || basename == "zjetsinc" || basename == "zjetsinc2" ){
-		  if( TString(currentFile->GetTitle()).Contains("zjets_") ) basename = "zjetsinc";
+		if( basename == "zjets" || basename == "zjetsinc" ){
+		  // if( !TString(currentFile->GetTitle()).Contains("zbb2l") ){
+		  // if( zmet.ngenbs() == 2 ){
+		  //   continue;
+		  //   // if( TString(currentFile->GetTitle()).Contains("zjets_") ) basename = "zjetsinc";
+		  // }
+
+		  if( TString(currentFile->GetTitle()).Contains("zjets_") ) {
+			if( zmet.nwzpartons() > 0 ){
+			  continue;
+			}
+		  }	  
+
+		  // if( basename == "zjetsinc" ){
+		  // 	if( zmet.ngenbs() == 2 ){
+		  // 	  continue;
+		  // 	}else{
+		  // }else{
+		  // basename = "zjetsinc2";
+		  // }
 		}
-	  
-		if( basename == "zjetsinc" ){
-		  if( zmet.nwzpartons() > 0 ){
-			continue;
-		  }
-		}
+		basename = "zjets";
 	  }
+	  // 	  if( TString(currentFile->GetTitle()).Contains("zjets_") ) basename = "zjetsinc";
+	  // 	}
 	  
+	  // 	if( basename == "zjetsinc" ){
+	  // 	  if( zmet.nwzpartons() > 0 ){
+	  // 		continue;
+	  // 	  }
+	  // 	}
+	  // }
+	  // }
+   	  
 	  //~-~-~-~-~-~-~-~-~-//
 	  //Analysis Code Here//
 	  //~-~-~-~-~-~-~-~-~-//
@@ -391,18 +530,22 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
 		  *zmet.weight()
 		  *luminosity;
 	  }else if( !zmet.isdata() && !(basename == "zpythia") ){
-	  	weight *= zmet.vtxweight();
-		weight *= zmet.trgeff();	   
+	  	weight = 1;
+	  	// weight *= zmet.vtxweight();
+		// weight *= zmet.trgeff();	   
 	  	weight *= zmet.weight();
 	  	weight *= luminosity;
 	  }else if (zmet.isdata()  ){
 	  	weight = 1;
 	  }
 	  
-	  //Selection starts here
+	  weight = 1;
+	  // weight *= zmet.vtxweight();
+	  // weight *= zmet.trgeff();	   
+	  weight *= zmet.weight();
+	  weight *= luminosity;
 
-	  //control run range if necessary
-	  // if( zmet.run() >= 197556 && zmet.run() <= 198913 )        continue;//exclude 2012cv1
+	  //Selection starts here
 
 	  // if(zmet.isdata() ){
 	  // 	if(!(zmet.csc()==0 && 
@@ -456,6 +599,7 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
 	  csvvals.push_back(csv2_nominal);
 	  csvvals.push_back(csv3_nominal);
 
+	  Float_t csvproduct = 0.0;
 	  
 	  // if( zmet.isdata() && zmet.pfTau_leadPtcandID() != (-1) ) continue;//tau veto	 
 	  if( zmet.njets() < 2 ){                                   continue;}//jet selection 
@@ -479,7 +623,8 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
 		if( zmet.njets() == 3 ){ jets.push_back(zmet.jet3()); }
 		mjj = (jets.at(0) + jets.at(1)).mass();
 		mT2j = getMT2b( leps, jets );
-
+		csvproduct = zmet.csv1()*zmet.csv2();
+		  
 	  }else if( dobveto && !dotwobtag ){
 		bool bveto = ( zmet.nbcsvl() < 1 );
 		if( dobveto && bveto ){
@@ -489,6 +634,7 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
 		  if( zmet.njets() == 3 ){ jets.push_back(zmet.jet3()); }
 		  mjj = (jets.at(0) + jets.at(1)).mass();
 		  mT2j = getMT2b( leps, jets );
+		  csvproduct = zmet.csv1()*zmet.csv2();
 		}else{ continue; }
 
 	  }else if( !dobveto && dotwobtag ){
@@ -496,6 +642,7 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
 		if( dotwobtag && twogoodbs ){
 		  mjj = (goodbs.at(0) + goodbs.at(1)).mass();
 		  mT2j = getMT2b( leps, goodbs );
+		  csvproduct = get2btagproduct( 0.244, csvvals );
 		}else{ continue; }		
 
 	  }else{
@@ -518,31 +665,52 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
 		if( ngenbs == 1 && !hasonegenbjets( mcfavals ) ) continue;
    		if( ngenbs == 2 && !hastwogenbjets( 0.244, csvvals, mcfavals ) ) continue;
 	  }
+	
+	  vector <Float_t> mcfavals;
+	  Float_t mcfaproduct = 0.0;
+
+	  if( !zmet.isdata() ){
+		mcfavals.push_back(zmet.jet1mcfa());
+		mcfavals.push_back(zmet.jet2mcfa());
+		mcfavals.push_back(zmet.jet3mcfa());
+		mcfaproduct = get2btagmcfaproduct( 0.244, csvvals, mcfavals );
+		if( dobveto ) mcfaproduct = zmet.jet1mcfa()*zmet.jet2mcfa();
+	  }
 
 	  if( zmet.leptype() == 2 ){
-		fillHist( hZMjjof, mjj, weight);
+		// fillHist( hZMjjof, csvproduct, weight);
+		// fillHist( hZMjjof, mcfaproduct, weight);
 		fillHist( hZPtof, zmet.dilep().pt(), weight);
 		fillHist( hZHtof, zmet.sumjetpt(), weight);
+
 	  }else if( ( zmet.leptype() == 0 || zmet.leptype() == 1 ) ){
 
 		if( !zmet.isdata() ){
-		  // if( zmet.pfmet() > 80.0 ){
-			// fillmcfahists( 0.244, z_mcfabjet1, z_mcfabjet2, weight );
+
+		  // if( zmet.pfmet() > 100.0 ){
+		  // fillmcfahists( 0.244, z_mcfabjet1, z_mcfabjet2, weight );
 		  // }
+
 		  if( abs(zmet.jet1mcfa()) != 21 && abs(zmet.jet1mcfa()) != 22 ) fillHist(z_mcfabjet1, abs(zmet.jet1mcfa()), weight);
 		  else if( abs(zmet.jet1mcfa()) == 21 )                               fillHist(z_mcfabjet1, 7, weight);
 		  else if( abs(zmet.jet1mcfa()) == 22 )                               fillHist(z_mcfabjet1, 8, weight);
 		  if( abs(zmet.jet2mcfa()) != 21 && abs(zmet.jet2mcfa()) != 22 ) fillHist(z_mcfabjet2, abs(zmet.jet2mcfa()), weight);
 		  else if( abs(zmet.jet2mcfa()) == 21 )                               fillHist(z_mcfabjet2, 7, weight);
 		  else if( abs(zmet.jet2mcfa()) == 22 )                               fillHist(z_mcfabjet2, 8, weight);
+
+		  // }
+
 		  if( abs(zmet.jet2mcfa()) == 5 ) fillHist(z_metwithbs, zmet.pfmet(), weight);
 		  if( abs(zmet.jet2mcfa()) == 4 ) fillHist(z_metwithcs, zmet.pfmet(), weight);
 		  // }
 		}
 
-		fillHist( hZMjjsf, mjj, weight);
+		fillHist( hZMjjsf, csvproduct, weight);
+		// fillHist( hZMjjsf, mcfaproduct, weight);
 		fillHist( hZPtsf, zmet.dilep().pt(), weight);
 		fillHist( hZHtsf, zmet.sumjetpt(), weight);
+		// if(      zmet.njets() == 2 )		fillHist( hZHtsf, zmet.jet1().pt() + zmet.jet2().pt(), weight);
+		// else if( zmet.njets() == 3 )		fillHist( hZHtsf, zmet.jet1().pt() + zmet.jet2().pt() + zmet.jet3().pt(), weight);
 	  }
 	  fillHist( hZ, zmet.nvtx(), weight );
 	  
@@ -598,7 +766,7 @@ void zhist_looper::setpthists( double minPT,  double maxPT )
   hZPt   -> Sumw2();
   hZPtof -> Sumw2();
   hZPtsf -> Sumw2();
-return;
+  return;
 }
 
 void zhist_looper::seththists( double minHT,  double maxHT )
@@ -610,10 +778,10 @@ void zhist_looper::seththists( double minHT,  double maxHT )
   }
   Int_t nhtbins = htbins.size()-1;
   
-  // // only necessary for debugging  
-  // for( Int_t bini = 0; bini < htbinning.size(); bini++ ){
-  // 	cout<<"ht binedgelow: "<<newhtbinning[bini]<<endl;;
-  // }
+  // only necessary for debugging  
+  for( Int_t bini = 0; bini < htbins.size(); bini++ ){
+  	cout<<"ht binedgelow: "<<newhtbinning[bini]<<endl;;
+  }
 
   // //histos for hT reweighting
   hZHt   = new TH1F("hZHt",   "hZHt",nhtbins,newhtbinning);
@@ -689,36 +857,36 @@ bool zhist_looper::getbjets( const Float_t workingpoint, const vector <Float_t> 
   return twogoodjets;
 }
 
-void zhist_looper::fillmcfahists( const Float_t workingpoint, TH1F * &photon_mcfabjet1, TH1F * &photon_mcfabjet2, const double weight ){
+void zhist_looper::fillmcfahists( const Float_t workingpoint, TH1F * &z_mcfabjet1, TH1F * &z_mcfabjet2, const double weight ){
   if(       zmet.csv1() >= workingpoint && zmet.csv2() >= workingpoint && zmet.csv3() < workingpoint ){
-	// fillHist(photon_mcfabjet1, abs(zmet.jet1mcfa()), weight);
-	// fillHist(photon_mcfabjet2, abs(zmet.jet2mcfa()), weight);
-	if( abs(zmet.jet1mcfa()) != 21 && abs(zmet.jet1mcfa()) != 22 ) fillHist(photon_mcfabjet1, abs(zmet.jet1mcfa()), weight);
-	else if( abs(zmet.jet1mcfa()) == 21 )                               fillHist(photon_mcfabjet1, 7, weight);
-	else if( abs(zmet.jet1mcfa()) == 22 )                               fillHist(photon_mcfabjet1, 8, weight);
-	if( abs(zmet.jet2mcfa()) != 21 && abs(zmet.jet2mcfa()) != 22 ) fillHist(photon_mcfabjet2, abs(zmet.jet2mcfa()), weight);
-	else if( abs(zmet.jet2mcfa()) == 21 )                               fillHist(photon_mcfabjet2, 7, weight);
-	else if( abs(zmet.jet2mcfa()) == 22 )                               fillHist(photon_mcfabjet2, 8, weight);
+	// fillHist(z_mcfabjet1, abs(zmet.jet1mcfa()), weight);
+	// fillHist(z_mcfabjet2, abs(zmet.jet2mcfa()), weight);
+	if( abs(zmet.jet1mcfa()) != 21 && abs(zmet.jet1mcfa()) != 22 ) fillHist(z_mcfabjet1, abs(zmet.jet1mcfa()), weight);
+	else if( abs(zmet.jet1mcfa()) == 21 )                               fillHist(z_mcfabjet1, 7, weight);
+	else if( abs(zmet.jet1mcfa()) == 22 )                               fillHist(z_mcfabjet1, 8, weight);
+	if( abs(zmet.jet2mcfa()) != 21 && abs(zmet.jet2mcfa()) != 22 ) fillHist(z_mcfabjet2, abs(zmet.jet2mcfa()), weight);
+	else if( abs(zmet.jet2mcfa()) == 21 )                               fillHist(z_mcfabjet2, 7, weight);
+	else if( abs(zmet.jet2mcfa()) == 22 )                               fillHist(z_mcfabjet2, 8, weight);
 
   }else if( zmet.csv1() >= workingpoint && zmet.csv3() >= workingpoint && zmet.csv2() < workingpoint ){
-	// fillHist(photon_mcfabjet1, abs(zmet.jet1mcfa()), weight);
-	// fillHist(photon_mcfabjet2, abs(zmet.jet3mcfa()), weight);
-	if( abs(zmet.jet1mcfa()) != 21 && abs(zmet.jet1mcfa()) != 22 ) fillHist(photon_mcfabjet1, abs(zmet.jet1mcfa()), weight);
-	else if( abs(zmet.jet1mcfa()) == 21 )                               fillHist(photon_mcfabjet1, 7, weight);
-	else if( abs(zmet.jet1mcfa()) == 22 )                               fillHist(photon_mcfabjet1, 8, weight);
-	if( abs(zmet.jet3mcfa()) != 21 && abs(zmet.jet3mcfa()) != 22 ) fillHist(photon_mcfabjet2, abs(zmet.jet3mcfa()), weight);
-	else if( abs(zmet.jet3mcfa()) == 21 )                               fillHist(photon_mcfabjet2, 7, weight);
-	else if( abs(zmet.jet3mcfa()) == 22 )                               fillHist(photon_mcfabjet2, 8, weight);
+	// fillHist(z_mcfabjet1, abs(zmet.jet1mcfa()), weight);
+	// fillHist(z_mcfabjet2, abs(zmet.jet3mcfa()), weight);
+	if( abs(zmet.jet1mcfa()) != 21 && abs(zmet.jet1mcfa()) != 22 ) fillHist(z_mcfabjet1, abs(zmet.jet1mcfa()), weight);
+	else if( abs(zmet.jet1mcfa()) == 21 )                               fillHist(z_mcfabjet1, 7, weight);
+	else if( abs(zmet.jet1mcfa()) == 22 )                               fillHist(z_mcfabjet1, 8, weight);
+	if( abs(zmet.jet3mcfa()) != 21 && abs(zmet.jet3mcfa()) != 22 ) fillHist(z_mcfabjet2, abs(zmet.jet3mcfa()), weight);
+	else if( abs(zmet.jet3mcfa()) == 21 )                               fillHist(z_mcfabjet2, 7, weight);
+	else if( abs(zmet.jet3mcfa()) == 22 )                               fillHist(z_mcfabjet2, 8, weight);
 
   }else if( zmet.csv2() >= workingpoint && zmet.csv3() >= workingpoint && zmet.csv1() < workingpoint ){
-	// fillHist(photon_mcfabjet1, abs(zmet.jet2mcfa()), weight);
-	// fillHist(photon_mcfabjet2, abs(zmet.jet3mcfa()), weight);
-	if( abs(zmet.jet2mcfa()) != 21 && abs(zmet.jet2mcfa()) != 22 ) fillHist(photon_mcfabjet1, abs(zmet.jet2mcfa()), weight);
-	else if( abs(zmet.jet2mcfa()) == 21 )                               fillHist(photon_mcfabjet1, 7, weight);
-	else if( abs(zmet.jet2mcfa()) == 22 )                               fillHist(photon_mcfabjet1, 8, weight);
-	if( abs(zmet.jet3mcfa()) != 21 && abs(zmet.jet3mcfa()) != 22 ) fillHist(photon_mcfabjet2, abs(zmet.jet3mcfa()), weight);
-	else if( abs(zmet.jet3mcfa()) == 21 )                               fillHist(photon_mcfabjet2, 7, weight);
-	else if( abs(zmet.jet3mcfa()) == 22 )                               fillHist(photon_mcfabjet2, 8, weight);
+	// fillHist(z_mcfabjet1, abs(zmet.jet2mcfa()), weight);
+	// fillHist(z_mcfabjet2, abs(zmet.jet3mcfa()), weight);
+	if( abs(zmet.jet2mcfa()) != 21 && abs(zmet.jet2mcfa()) != 22 ) fillHist(z_mcfabjet1, abs(zmet.jet2mcfa()), weight);
+	else if( abs(zmet.jet2mcfa()) == 21 )                               fillHist(z_mcfabjet1, 7, weight);
+	else if( abs(zmet.jet2mcfa()) == 22 )                               fillHist(z_mcfabjet1, 8, weight);
+	if( abs(zmet.jet3mcfa()) != 21 && abs(zmet.jet3mcfa()) != 22 ) fillHist(z_mcfabjet2, abs(zmet.jet3mcfa()), weight);
+	else if( abs(zmet.jet3mcfa()) == 21 )                               fillHist(z_mcfabjet2, 7, weight);
+	else if( abs(zmet.jet3mcfa()) == 22 )                               fillHist(z_mcfabjet2, 8, weight);
 
   }
   return;
@@ -728,6 +896,7 @@ void zhist_looper::setSample( string samplename )
 {
   if(       TString(samplename).Contains("zjetsmc_") ){ basename = "zpythia";
   }else if( TString(samplename).Contains("zjets_") ){ basename = "zjetsinc";
+  }else if( TString(samplename).Contains("zbb2l_") ){ basename = "zjets";
   }else if( TString(samplename).Contains("z1jet_") ){ basename = "zjets";
   }else if( TString(samplename).Contains("z2jet_") ){ basename = "zjets";
   }else if( TString(samplename).Contains("z3jet_") ){ basename = "zjets";
@@ -865,10 +1034,14 @@ void zhist_looper::saveHists(){
   hZPtsf  -> Write();
   hZMjjsf -> Write();
   hZHtsf  -> Write();
-  z_mcfabjet1 -> Write();
-  z_mcfabjet2 -> Write();
-  z_metwithbs -> Write();
-  z_metwithcs -> Write();
+
+  if( TString(rootfilename).Contains("MC") ){
+	z_mcfabjet1 -> Write();
+	z_mcfabjet2 -> Write();
+	z_metwithbs -> Write();
+	z_metwithcs -> Write();
+  }
+
   fratio  -> Close();
   return;
 }
