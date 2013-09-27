@@ -74,12 +74,16 @@ int run_zhist_looper( Float_t lowcut = 0.0, std::string selection = "", bool ism
 
 	ntuples = "/home/users/cwelke/ZHmet_2013/output/V00-02-19";
 
-	samples.push_back("zjetsmc_ee_baby.root");
-	samples.push_back("zjetsmc_mm_baby.root");
+	// samples.push_back("zjetsmc_ee_baby.root");
+	// samples.push_back("zjetsmc_mm_baby.root");
 
-	// ch->Add("/home/users/cwelke/ZMet_2012/output/V00-02-15/zjetsmc_ee_baby.root");
-	// ch->Add("/home/users/cwelke/ZMet_2012/output/V00-02-15/zjetsmc_mm_baby.root");
+	samples.push_back("zjets_53X_slim_baby.root");
+	samples.push_back("z1jet_53X_slim__baby.root");
+	samples.push_back("z2jet_53X_slim__baby.root");
+	samples.push_back("z3jet_53X_slim__baby.root");
+	samples.push_back("z4jet_53X_slim__baby.root");
 
+	// samples.push_back("zbb2l_53X_slim_baby.root");
   }
 
   for( size_t ind = 0; ind < samples.size(); ind++ ){

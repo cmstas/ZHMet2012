@@ -29,9 +29,19 @@ int makeAllvtxHistos( bool doMC = false, std::string selection = ""  )
   gStyle->SetOptStat(111111);
 
   TChain *ch = new TChain("T1"); 
+
   if( doMC ){ ch->Add("/home/users/cwelke/Analysis/Winter2012/photon_output/V00-02-06/photon_*_baby.root");
-// ch->Add("/home/users/cwelke/Analysis/Winter2012/photon_output/V00-02-06/photon_15_baby.root");
-  }else{ ch->Add("/home/users/cwelke/Analysis/Winter2012/photon_output/V00-02-05/data_53X_2012*_baby.root");
+
+  // if( doMC ){ 
+  // 	ch->Add("/nfs-6/userdata/cwelke/ZHMet2012/photon_output/V00-02-21/photon_mght40*_baby.root");
+  // 	ch->Add("/nfs-6/userdata/cwelke/ZHMet2012/photon_output/V00-02-21/photon_mght100*_baby.root");
+  // 	ch->Add("/nfs-6/userdata/cwelke/ZHMet2012/photon_output/V00-02-21/merged/photon_mght200_baby.root");
+  // 	ch->Add("/nfs-6/userdata/cwelke/ZHMet2012/photon_output/V00-02-21/merged/photon_mght400_baby.root");
+
+  }else{ 
+	ch->Add("/home/users/cwelke/Analysis/Winter2012/photon_output/V00-02-05/data_53X_2012*_baby.root");
+	// ch->Add("/home/users/cwelke/Analysis/Winter2012/photon_output/V00-02-05/ttbar_slmc_53X_baby.root");  
+	// ch->Add("/home/users/cwelke/Analysis/Winter2012/photon_output/V00-02-05/ttbar_flmc_53X_baby.root");  
   }
 
   string rootfilename;
