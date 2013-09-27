@@ -30,8 +30,6 @@ make_ghists $ISMC $SELECTION
 
 }
 
-ismc=false
-
 # compile zlooper
 echo "Compiling zlooper."
 cd zlooper
@@ -50,14 +48,13 @@ if [ ! "$?" -eq "0" ]; then
 	exit
 fi
 
-ismc=true
+# ismc=true
+ismc=false
+
 # root -b -q "makeZhists.cc+($ismc)"
 # root -b -q "makeAllvtxHistos.cc($ismc)"
 
 # selection="_bveto_mjjhi_mt2jhi"
-# make_all_hists $ismc $selection &
-
-# selection="_bveto_mjjlo_mt2jhi"
 # make_all_hists $ismc $selection &
 
 # selection="_bveto_mjjhi_mt2jlo"
@@ -66,8 +63,11 @@ ismc=true
 # selection="_bveto_mjjlo_mt2jlo"
 # make_all_hists $ismc $selection &
 
-# selection="_2btag_mjjhi_mt2jhi"
+# selection="_bveto_mjjlo_mt2jhi"
 # make_all_hists $ismc $selection &
+
+selection="_2btag_mjjhi_mt2jhi"
+make_all_hists $ismc $selection &
 
 # selection="_2btag_mjjhi_mt2jlo"
 # make_all_hists $ismc $selection &
@@ -84,15 +84,26 @@ ismc=true
 # selection="_2btag_mt2jhi"
 # make_all_hists $ismc $selection &
 
-# selection="_2btag"
+# selection="_bveto_mt2jlo"
 # make_all_hists $ismc $selection &
 
-selection="_2btag_0genbs"
-make_all_hists $ismc $selection &
-selection="_2btag_1genbs"
-make_all_hists $ismc $selection &
-selection="_2btag_2genbs"
-make_all_hists $ismc $selection &
+# selection="_bveto_mt2jhi"
+# make_all_hists $ismc $selection &
+
+# selection="_bveto"
+# make_all_hists $ismc $selection &
+# # make_ghists $ismc $selection &
+
+# selection="_2btag"
+# make_all_hists $ismc $selection &
+# # make_ghists $ismc $selection &
+
+# selection="_2btag_0genbs"
+# make_all_hists $ismc $selection &
+# selection="_2btag_1genbs"
+# make_all_hists $ismc $selection &
+# selection="_2btag_2genbs"
+# make_all_hists $ismc $selection &
 
 # selection=""
 # make_all_hists $ismc $selection &
