@@ -102,33 +102,33 @@ void vtxLooper::setBinning( vector <double> binning )
 
 void vtxLooper::setzvar( TH1F * &zhist )
 {
-  hzvar = (TH1F*)zhist->Clone("hzvar");
+  hzvar = dynamic_cast<TH1F*>(zhist->Clone("hzvar"));
   return;
 }
 
 void vtxLooper::setzmjj( TH1F * &zhist )
 {
-  hzmjj = (TH1F*)zhist->Clone("hzmjj");
+  hzmjj = dynamic_cast<TH1F*>(zhist->Clone("hzmjj"));
   return;
 }
 
 void vtxLooper::setzvtx( TH1F * &zhist )
 {
-  hzvtx = (TH1F*)zhist->Clone("hZ");
+  hzvtx = dynamic_cast<TH1F*>(zhist->Clone("hZ"));
   // hzvtx -> Scale ( 0.0 );
   return;
 }
 
 void vtxLooper::setgmjj( TH1F * &zhist )
 {
-  hgmjj = (TH1F*)zhist->Clone("hgmjj");
+  hgmjj = dynamic_cast<TH1F*>(zhist->Clone("hgmjj"));
   hgmjj -> Scale ( 0.0 );
   return;
 }
 
 void vtxLooper::setgvar( TH1F * &zhist )
 {
-  hgvar = (TH1F*)zhist->Clone("hgvar");
+  hgvar = dynamic_cast<TH1F*>(zhist->Clone("hgvar"));
   hgvar -> Scale ( 0.0 );
   // cout<<hgvar -> GetSumOfWeights()<<endl;
   return;
@@ -225,20 +225,20 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 	  // if( runnumber == 2) htreweightHist = (TH1F*) reweightfile->Get("hhtratio");	
 	  reweightfile = TFile::Open( Form( "vtxreweight_DoubleElectron_19fb_MC%s.root", selection.c_str() ), "READ");
 	  if( runnumber == 1){
-		ptreweightHist = (TH1F*) reweightfile->Get("hptratio");	
+		ptreweightHist = dynamic_cast<TH1F*>(reweightfile->Get("hptratio"));	
 	  }if( runnumber == 2){
-		ptreweightHist = (TH1F*) reweightfile->Get("hptratio");	
-		htreweightHist = (TH1F*) reweightfile->Get("hhtratio");	
+		ptreweightHist = dynamic_cast<TH1F*>(reweightfile->Get("hptratio"));	
+		htreweightHist = dynamic_cast<TH1F*>(reweightfile->Get("hhtratio"));	
 	  }
 		
 	}else{ 
 	  if( runnumber != 0 ) {
 		reweightfile = TFile::Open( Form( "vtxreweight_DoubleElectron_19fb_data%s.root", selection.c_str() ), "READ");
 		if( runnumber == 1){
-		  ptreweightHist = (TH1F*) reweightfile->Get("hptratio");	
+		  ptreweightHist = dynamic_cast<TH1F*>(reweightfile->Get("hptratio"));	
 		}if( runnumber == 2){ 
-		  ptreweightHist = (TH1F*) reweightfile->Get("hptratio");	
-		  htreweightHist = (TH1F*) reweightfile->Get("hhtratio");	
+		  ptreweightHist = dynamic_cast<TH1F*>(reweightfile->Get("hptratio"));	
+		  htreweightHist = dynamic_cast<TH1F*>(reweightfile->Get("hhtratio"));	
 		}
 	  }
 	}
@@ -333,6 +333,8 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 		weight *= 19.5;
 	  }
 	  	  
+	  // if( event % 12 != 0 ) continue;
+
 	  //b-tag reshaping
 	  float csv1_nominal = templates.csv1();
 	  float csv2_nominal = templates.csv2();
@@ -510,15 +512,15 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
   TH1F * hratio90  = NULL;
 
   if( runnumber == 0 ){
-	hratio20 = (TH1F*) hzvtx->Clone("hratio20");
-	hratio30 = (TH1F*) hzvtx->Clone("hratio30");
-	hratio50 = (TH1F*) hzvtx->Clone("hratio50");
-	hratio70 = (TH1F*) hzvtx->Clone("hratio70");
-	hratio90 = (TH1F*) hzvtx->Clone("hratio90");
+	hratio20 = dynamic_cast<TH1F*>(hzvtx->Clone("hratio20"));
+	hratio30 = dynamic_cast<TH1F*>(hzvtx->Clone("hratio30"));
+	hratio50 = dynamic_cast<TH1F*>(hzvtx->Clone("hratio50"));
+	hratio70 = dynamic_cast<TH1F*>(hzvtx->Clone("hratio70"));
+	hratio90 = dynamic_cast<TH1F*>(hzvtx->Clone("hratio90"));
 
-	hzvarnorm = (TH1F*)hzvar -> Clone("hzptnorm");
-	hgvarnorm = (TH1F*)hgvar -> Clone("hgptnorm");
-	hratio    = (TH1F*)hzvar -> Clone("hptratio");
+	hzvarnorm = dynamic_cast<TH1F*>(hzvar -> Clone("hzptnorm"));
+	hgvarnorm = dynamic_cast<TH1F*>(hgvar -> Clone("hgptnorm"));
+	hratio    = dynamic_cast<TH1F*>(hzvar -> Clone("hptratio"));
 
 	hratio20 -> Scale ( 1.0 / hratio20 -> GetSumOfWeights() );
 	hratio30 -> Scale ( 1.0 / hratio30 -> GetSumOfWeights() );
@@ -540,17 +542,17 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 
   }else if( runnumber == 1 ){
 
-	hzvarnorm = (TH1F*)hzvar->Clone("hzhtnorm");
-	hgvarnorm = (TH1F*)hgvar->Clone("hghtnorm");
-	hratio    = (TH1F*)hzvar->Clone("hhtratio");
+	hzvarnorm = dynamic_cast<TH1F*>(hzvar->Clone("hzhtnorm"));
+	hgvarnorm = dynamic_cast<TH1F*>(hgvar->Clone("hghtnorm"));
+	hratio    = dynamic_cast<TH1F*>(hzvar->Clone("hhtratio"));
 
   }else if( runnumber == 2 ){
 
-	hzmjjnorm = (TH1F*)hzmjj -> Clone("hzmjjnorm");
-	hgmjjnorm = (TH1F*)hgmjj -> Clone("hgmjjnorm");
+	hzmjjnorm = dynamic_cast<TH1F*>(hzmjj -> Clone("hzmjjnorm"));
+	hgmjjnorm = dynamic_cast<TH1F*>(hgmjj -> Clone("hgmjjnorm"));
 	hgmjjnorm -> Scale ( 1.0/ hgmjjnorm -> GetSumOfWeights() );
 	hzmjjnorm -> Scale ( 1.0/ hzmjjnorm -> GetSumOfWeights() );
-	hmjjratio = (TH1F*)hzmjj->Clone("hmjjratio");
+	hmjjratio = dynamic_cast<TH1F*>(hzmjj->Clone("hmjjratio"));
 	hmjjratio -> Scale ( 1.0 / hmjjratio -> GetSumOfWeights() );
 	hmjjratio -> Divide(hgmjjnorm);  
 	
@@ -586,16 +588,16 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 
   fratio->cd();
   if( runnumber == 0 ){
-	(TH1F*)hgvar -> Clone("gPt") -> Write();
-	(TH1F*)hzvar -> Clone("ZPt") -> Write();
+	dynamic_cast<TH1F*>(hgvar -> Clone("gPt")) -> Write();
+	dynamic_cast<TH1F*>(hzvar -> Clone("ZPt")) -> Write();
 	hratio20 -> Write();
 	hratio30 -> Write();
 	hratio50 -> Write();
 	hratio70 -> Write();
 	hratio90 -> Write();
   }else if( runnumber == 1 ){
-	(TH1F*)hgvar -> Clone("gHt") -> Write();
-	(TH1F*)hzvar -> Clone("ZHt") -> Write();
+	dynamic_cast<TH1F*>(hgvar -> Clone("gHt")) -> Write();
+	dynamic_cast<TH1F*>(hzvar -> Clone("ZHt")) -> Write();
   }else if( runnumber == 2 ){
 	hzmjj -> Write();
 	hgmjj -> Write();
@@ -620,28 +622,31 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
 
   finalratio->cd();
   if( runnumber == 0 ){
-	(TH1F*)hgvar -> Clone("gPt") -> Write();
-	(TH1F*)hzvar -> Clone("ZPt") -> Write();
+	dynamic_cast<TH1F*>(hgvar -> Clone("gPt")) -> Write();
+	dynamic_cast<TH1F*>(hzvar -> Clone("ZPt")) -> Write();
 	hratio20 -> Write();
 	hratio30 -> Write();
 	hratio50 -> Write();
 	hratio70 -> Write();
 	hratio90 -> Write();
 
+	dynamic_cast<TH1F*>(zfile -> Get( "hZHt_compare" )) -> Write();
+	dynamic_cast<TH1F*>(zfile -> Get( "hZPt_compare" )) -> Write();
+
 	if( !isdata ){
 	  photon_mcfabjet1 -> Write();
 	  photon_mcfabjet2 -> Write();
 	  photon_metwithbs -> Write();
 	  photon_metwithcs -> Write();
-	  (TH1F*)zfile -> Get( "z_mcfabjet1" ) -> Write();
-	  (TH1F*)zfile -> Get( "z_mcfabjet2" ) -> Write();
-	  (TH1F*)zfile -> Get( "z_metwithbs" ) -> Write();
-	  (TH1F*)zfile -> Get( "z_metwithcs" ) -> Write();
+	  dynamic_cast<TH1F*>(zfile -> Get( "z_mcfabjet1" )) -> Write();
+	  dynamic_cast<TH1F*>(zfile -> Get( "z_mcfabjet2" )) -> Write();
+	  dynamic_cast<TH1F*>(zfile -> Get( "z_metwithbs" )) -> Write();
+	  dynamic_cast<TH1F*>(zfile -> Get( "z_metwithcs" )) -> Write();
 	}
 
   }else if( runnumber == 1 ){
-	(TH1F*)hgvar -> Clone("gHt") -> Write();
-	(TH1F*)hzvar -> Clone("ZHt") -> Write();
+	dynamic_cast<TH1F*>(hgvar -> Clone("gHt")) -> Write();
+	dynamic_cast<TH1F*>(hzvar -> Clone("ZHt")) -> Write();
   }else if( runnumber == 2 ){
 	hzmjj -> Write();
 	hgmjj -> Write();
@@ -656,7 +661,7 @@ int vtxLooper::ScanChain( TChain* chain, bool fast = true, int nEvents = -1, Int
   }
   finalratio -> Close();
 
-	zfile -> Close();
+  zfile -> Close();
 
 
   return 0;

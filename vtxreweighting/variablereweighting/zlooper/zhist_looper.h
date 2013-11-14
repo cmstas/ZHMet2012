@@ -101,6 +101,13 @@ private:
   TH1F* hZMjjof;
   TH1F* hZMjjsf;
 
+  TH1F* hZPt_compare;
+  TH1F* hZHt_compare;
+  TH1F* hZPtof_compare;
+  TH1F* hZHtof_compare;
+  TH1F* hZPtsf_compare;
+  TH1F* hZHtsf_compare;
+
   // //histos for pT reweighting
   TH1F* hZPt;
   TH1F* hZPtof;

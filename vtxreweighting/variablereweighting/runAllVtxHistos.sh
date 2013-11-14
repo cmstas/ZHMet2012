@@ -48,14 +48,14 @@ if [ ! "$?" -eq "0" ]; then
 	exit
 fi
 
-# ismc=true
+ismc=true
 ismc=false
 
 # root -b -q "makeZhists.cc+($ismc)"
 # root -b -q "makeAllvtxHistos.cc($ismc)"
 
-# selection="_bveto_mjjhi_mt2jhi"
-# make_all_hists $ismc $selection &
+selection="_bveto_mjjhi_mt2jhi"
+make_all_hists $ismc $selection &
 
 # selection="_bveto_mjjhi_mt2jlo"
 # make_all_hists $ismc $selection &
@@ -66,12 +66,13 @@ ismc=false
 # selection="_bveto_mjjlo_mt2jhi"
 # make_all_hists $ismc $selection &
 
-selection="_2btag_mjjhi_mt2jhi"
-make_all_hists $ismc $selection &
+# selection="_2btag_mjjhi_mt2jhi"
+# make_all_hists $ismc $selection &
 
 # selection="_2btag_mjjhi_mt2jlo"
 # make_all_hists $ismc $selection &
 
+# # Signal Region
 # selection="_2btag_mjjlo_mt2jhi"
 # make_all_hists $ismc $selection &
 
@@ -92,11 +93,11 @@ make_all_hists $ismc $selection &
 
 # selection="_bveto"
 # make_all_hists $ismc $selection &
-# # make_ghists $ismc $selection &
+# # # make_ghists $ismc $selection &
 
 # selection="_2btag"
 # make_all_hists $ismc $selection &
-# # make_ghists $ismc $selection &
+# # # make_ghists $ismc $selection &
 
 # selection="_2btag_0genbs"
 # make_all_hists $ismc $selection &

@@ -52,6 +52,9 @@ zhist_looper::zhist_looper()
   hZMjjof = NULL;
   hZMjjsf = NULL;
 
+  hZPt_compare = NULL;
+  hZHt_compare = NULL;
+
   // //histos for pT reweighting
   hZPt = NULL;
   hZPtof = NULL;
@@ -111,6 +114,20 @@ zhist_looper::zhist_looper( Float_t mT2jlow = 0.0, Float_t mT2jhi = 5000.0, stri
   hZMjj = NULL;
   hZMjjof = NULL;
   hZMjjsf = NULL;
+
+  hZPt_compare = new TH1F("hZPt_compare","Z pT",500,0,500);
+  hZHt_compare = new TH1F("hZHt_compare","Z HT",1000,0,1000);
+  hZPtsf_compare = new TH1F("hZPtsf_compare","Z pT",500,0,500);
+  hZHtsf_compare = new TH1F("hZHtsf_compare","Z HT",1000,0,1000);
+  hZPtof_compare = new TH1F("hZPtof_compare","Z pT",500,0,500);
+  hZHtof_compare = new TH1F("hZHtof_compare","Z HT",1000,0,1000);
+
+  hZPt_compare -> Sumw2();
+  hZPtsf_compare -> Sumw2();
+  hZPtof_compare -> Sumw2();
+  hZHt_compare -> Sumw2();
+  hZHtsf_compare -> Sumw2();
+  hZHtof_compare -> Sumw2();
 
   // //histos for pT reweighting
   hZPt = NULL;
@@ -368,7 +385,7 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
 	  hZMjjsf = new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
 	  // setmjjhists( 40.0, 600.0 );
 	}else if( dotwobtag && domjjlo && domt2jhi ){
-	  setpthists( 2.0, 162.0 );
+	  setpthists( 2.0, 177.0 );
 	  seththists( 90.0, 480.0 );
 	  hZMjj =   new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
 	  hZMjjof = new TH1F( "hZMjj", "hZMjj", 25, 0, 1 );
@@ -680,6 +697,9 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
 	  if( zmet.leptype() == 2 ){
 		// fillHist( hZMjjof, csvproduct, weight);
 		// fillHist( hZMjjof, mcfaproduct, weight);
+		fillHist( hZPtof_compare, zmet.dilep().pt(), weight);
+		fillHist( hZHtof_compare, zmet.sumjetpt(), weight);
+
 		fillHist( hZPtof, zmet.dilep().pt(), weight);
 		fillHist( hZHtof, zmet.sumjetpt(), weight);
 
@@ -704,6 +724,9 @@ int zhist_looper::ScanChain ( TChain * chain, bool fast, int nEvents, string ski
 		  if( abs(zmet.jet2mcfa()) == 4 ) fillHist(z_metwithcs, zmet.pfmet(), weight);
 		  // }
 		}
+
+		fillHist( hZPtsf_compare, zmet.dilep().pt(), weight);
+		fillHist( hZHtsf_compare, zmet.sumjetpt(), weight);
 
 		fillHist( hZMjjsf, csvproduct, weight);
 		// fillHist( hZMjjsf, mcfaproduct, weight);
@@ -1002,11 +1025,18 @@ void zhist_looper::fillHist(  TH1F* &hist, double variable, const double weight 
 void zhist_looper::subtract_ofevents()
 {
   hZMjj -> Add( hZMjjsf );
-  hZMjj -> Add( hZMjjof, -0.97 );
+  hZMjj -> Add( hZMjjof, -0.98 );
+
+  hZPt_compare -> Add( hZPtsf_compare );
+  hZPt_compare -> Add( hZPtof_compare, -0.98 );
+  hZHt_compare -> Add( hZHtsf_compare );
+  hZHt_compare -> Add( hZHtof_compare, -0.98 );
+
   hZPt -> Add( hZPtsf );
-  hZPt -> Add( hZPtof, -0.97 );
+  hZPt -> Add( hZPtof, -0.98 );
   hZHt -> Add( hZHtsf );
-  hZHt -> Add( hZHtof, -0.97 );
+  hZHt -> Add( hZHtof, -0.98 );
+
   return;
 }
 
@@ -1023,17 +1053,23 @@ void zhist_looper::saveHists(map < string, TH1F* > &hist_map ){
 void zhist_looper::saveHists(){
 
   TFile *fratio = TFile::Open(rootfilename.c_str(),"RECREATE");
-  fratio  -> cd();
-  hZ      -> Write();
-  hZPt    -> Write();
-  hZMjj   -> Write();
-  hZHt    -> Write();
-  hZPtof  -> Write();
-  hZMjjof -> Write();
-  hZHtof  -> Write();
-  hZPtsf  -> Write();
-  hZMjjsf -> Write();
-  hZHtsf  -> Write();
+  fratio         -> cd();
+  hZ             -> Write();
+  hZPt_compare   -> Write();
+  hZPtsf_compare -> Write();
+  hZPtof_compare -> Write();
+  hZHt_compare   -> Write();
+  hZHtsf_compare -> Write();
+  hZHtof_compare -> Write();
+  hZPt           -> Write();
+  hZMjj          -> Write();
+  hZHt           -> Write();
+  hZPtof         -> Write();
+  hZMjjof        -> Write();
+  hZHtof         -> Write();
+  hZPtsf         -> Write();
+  hZMjjsf        -> Write();
+  hZHtsf         -> Write();
 
   if( TString(rootfilename).Contains("MC") ){
 	z_mcfabjet1 -> Write();
