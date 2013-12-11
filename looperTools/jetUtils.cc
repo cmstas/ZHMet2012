@@ -63,8 +63,8 @@ float getMbb_multijets( const vector <LorentzVector> &jets, const vector <float>
 	sort( sortedCSVValues.begin(), sortedCSVValues.end(), sortByCSVValues );
 
 	if ( sortedCSVValues.at(0).first > workingpoint && sortedCSVValues.at(1).first > workingpoint ){
-	  LorentzVector bjet1 = jets.at( sortedCSVValues.at(0).second );
-	  LorentzVector bjet2 = jets.at( sortedCSVValues.at(1).second );
+	  const LorentzVector &bjet1 = jets.at( sortedCSVValues.at(0).second );
+	  const LorentzVector &bjet2 = jets.at( sortedCSVValues.at(1).second );
 	  return ( bjet1 + bjet2 ).mass();
 	}else{
 	  return 0.0;
