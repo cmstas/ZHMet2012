@@ -11,6 +11,8 @@ The rest should be included with the repository.
 
 Make sure the links in runZLooper.cc are set correctly.
 
+Additionally, make sure CORE is compiled before running.
+
 In order to run a sample, comment the datasets you want to run in makeAllZBabies.sh, e.g. 
 
 processsample TChizh_53X_150_1 false $versionnumber

@@ -180,6 +180,13 @@ void doAllZ( string prefix, string ntuplenumber, bool isData, float kFactor, str
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/MuEG_Run2012B-13Jul2012-v1_AOD/merged/merged*.root");
 	}
 
+	else if( prefix == "data_53X_2012C_ecalreco" ){    
+	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-EcalRecover_11Dec2012-v1_AOD/merged/merged*root");
+	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleMu_Run2012C-EcalRecover_11Dec2012-v1_AOD/merged/merged*root");
+	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/MuEG_Run2012C-EcalRecover_11Dec2012-v1_AOD/merged/merged*root");
+
+	}
+
 	else if( prefix == "data_53X_2012C" ){    
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-24Aug2012-v1_AOD/merged/merged*root");
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-PromptReco-v2_AOD/merged/merged*root");

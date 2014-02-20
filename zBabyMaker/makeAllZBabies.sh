@@ -22,6 +22,7 @@ fi
 
 # processsample data_53X_2012A true $versionnumber
 # processsample data_53X_2012B true $versionnumber
+processsample data_53X_2012C_ecalreco true $versionnumber
 # processsample data_53X_2012C true $versionnumber
 # processsample data_53X_2012D true $versionnumber
 
@@ -35,7 +36,7 @@ fi
 # processsample TChizh_53X_200_1 false $versionnumber
 # processsample TChizh_53X_250_1 false $versionnumber
 
-processsample TChizh_53X_scan false $versionnumber
+# processsample TChizh_53X_scan false $versionnumber
 
 # processsample zhsm_53X_slim false $versionnumber
 
