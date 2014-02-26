@@ -52,11 +52,14 @@
 #include "../looperTools/histtools.h"
 #include "../looperTools/commonLooperUtils.h"
 
+#include "../susy_xsecs/getZHGMSBCrossSection.cc"
+
 using namespace tas;
 
 makePhotonBabies::makePhotonBabies( string iteration = "" ) 
 {
   iter = iteration;
+
 };
 
 //--------------------------------------------------------------------
@@ -270,6 +273,11 @@ int makePhotonBabies::passThisHLTTrigger( string hltname ){
 void makePhotonBabies::ScanChain (TChain* chain, const char* prefix, bool isData, 
                                   bool calculateTCMET, int nEvents, float kFactor){
 
+
+  TFile * nsigEvtsHistFile = TFile::Open("../susy_xsecs/myMassDB_TChiZH.root","READ");
+  nsigEvtsHist_ = dynamic_cast<TH2F*>(nsigEvtsHistFile -> Get("masses") -> Clone("nsigEvtsHist"));
+  // nsigEvtsHistFile -> Close();  		// mg_ = -1;//sparm_mN();
+
   cout << "version : " << iter         << endl;
   cout << "json    : " << jsonfilename << endl;
   set_goodrun_file( jsonfilename );
@@ -424,6 +432,35 @@ void makePhotonBabies::ScanChain (TChain* chain, const char* prefix, bool isData
         weight_ = cms2.evt_scale1fb() * kFactor * lumi;
         pthat_  = cms2.genps_pthat();
       }
+
+      //-------------------------------------------------------
+      // separate Signal MC by mass point
+      //-------------------------------------------------------
+      
+	  if( TString(prefix).Contains("photon_tchizh") ){
+
+		// ml_ = -1;//sparm_mL();
+		int mg_     = cms2.sparm_values().at(0);
+		int ml_     = cms2.sparm_values().at(1);
+		bool found_good_sig_event = false;
+
+		for( int mgind = 129; mgind < 501; mgind++ ){
+		  for( int mlind = 0; mlind < 401; mlind++ ){
+			if( TString(prefix).Contains(Form("%i_%i", mgind, mlind ) ) ){
+			  if( mg_ == mgind && ml_ == mlind ) 
+				// cout<<"mg: "<<mg_<<" | ml: "<<ml_<<endl;
+				found_good_sig_event = true;
+			}
+		  }
+		}
+
+		if( !found_good_sig_event ) continue;
+
+		weight_ = 0.5 * lumi * getZHGMSBCrossSection( mg_ ) * (1000.0) / nsigEvtsHist_ -> GetBinContent( nsigEvtsHist_ -> FindBin( mg_, ml_ ) ); // /nevts);
+		// x_  = -999;
+
+	  }
+
 
       //-------------------------------------------------------
       // stitching together Photon MC

@@ -100,6 +100,13 @@ void doAllPhotonBabies( string prefix, string ntuplenumber, bool isData, float k
 
   //-----------------------------------------------------------------------------------
 
+
+  else if( TString(prefix).Contains("photon_tchizh") ){
+    pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/SMS-TChiZH_ZllHbb_2J_mChargino-130to500_mLSP-1to370_TuneZ2star_8TeV-madgraph-tauola/V05-03-31/merged_ntuple_%s.root", percentage.c_str() ));
+  }
+
+  //-----------------------------------------------------------------------------------
+
   else if( prefix == "photon_mght40" ){
     pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/GJets_HT-40To100_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V19-v1/V05-03-31/merged_ntuple_%s.root", percentage.c_str() ));
   }
@@ -170,10 +177,10 @@ void doAllPhotonBabies( string prefix, string ntuplenumber, bool isData, float k
   bool calculateTCMET = false;  //recalculate tcmet on-the-fly?
   
   cout << endl;
-  cout << "Checking for corrupt files" << endl;
-  cout << "Entries " << ch->GetEntries() << endl;
-  ch->Draw("evt_run");
-  cout << endl;
+  // cout << "Checking for corrupt files" << endl;
+  // cout << "Entries " << ch->GetEntries() << endl;
+  // ch->Draw("evt_run");
+  // cout << endl;
   
   if( ntuplenumber != "" ){
     prefix = Form("%s_%s", prefix.c_str(), percentage.c_str() );

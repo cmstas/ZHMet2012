@@ -7,6 +7,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "TChain.h"
 #include "Math/LorentzVector.h"
 
@@ -43,6 +44,7 @@ class makePhotonBabies
  private:
         
   std::string iter;
+  TH2F * nsigEvtsHist_;
 
   //ntuple, file
   TFile *babyFile_;

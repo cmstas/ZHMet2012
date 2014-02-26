@@ -13,15 +13,20 @@ fi
 # processsample zjetsmc_ee false $versionnumber
 # processsample zjetsmc_mm false $versionnumber
 
-processsample photon_mght40 false $versionnumber "1*" &
-processsample photon_mght40 false $versionnumber "2*" &
-processsample photon_mght40 false $versionnumber "3*" &
-processsample photon_mght40 false $versionnumber "4*" &
-processsample photon_mght40 false $versionnumber "5*" &
-processsample photon_mght40 false $versionnumber "6*" &
-processsample photon_mght40 false $versionnumber "7*" &
-processsample photon_mght40 false $versionnumber "8*" &
-processsample photon_mght40 false $versionnumber "9*" &
+# processsample photon_mght40 false $versionnumber "1*" &
+# processsample photon_mght40 false $versionnumber "2*" &
+# processsample photon_mght40 false $versionnumber "3*" &
+# processsample photon_mght40 false $versionnumber "4*" &
+# processsample photon_mght40 false $versionnumber "5*" &
+# processsample photon_mght40 false $versionnumber "6*" &
+# processsample photon_mght40 false $versionnumber "7*" &
+# processsample photon_mght40 false $versionnumber "8*" &
+# processsample photon_mght40 false $versionnumber "9*" &
+
+processsample photon_tchizh_250_1 false $versionnumber &
+processsample photon_tchizh_200_1 false $versionnumber &
+processsample photon_tchizh_150_1 false $versionnumber &
+processsample photon_tchizh_130_1 false $versionnumber &
 
 # processsample photon_15 false $versionnumber 1
 # processsample photon_15 false $versionnumber 2
