@@ -826,6 +826,24 @@ protected:
 	float	l2j1_;
 	TBranch *l2j1_branch;
 	bool l2j1_isLoaded;
+	float	lep1iso_;
+	TBranch *lep1iso_branch;
+	bool lep1iso_isLoaded;
+	float	lep2iso_;
+	TBranch *lep2iso_branch;
+	bool lep2iso_isLoaded;
+	float	lep1D0_;
+	TBranch *lep1D0_branch;
+	bool lep1D0_isLoaded;
+	float	lep2D0_;
+	TBranch *lep2D0_branch;
+	bool lep2D0_isLoaded;
+	float	lep1Dz_;
+	TBranch *lep1Dz_branch;
+	bool lep1Dz_isLoaded;
+	float	lep2Dz_;
+	TBranch *lep2Dz_branch;
+	bool lep2Dz_isLoaded;
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > *dilep_;
 	TBranch *dilep_branch;
 	bool dilep_isLoaded;
@@ -943,6 +961,18 @@ protected:
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > *bjet4_;
 	TBranch *bjet4_branch;
 	bool bjet4_isLoaded;
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > *genchi30p4_;
+	TBranch *genchi30p4_branch;
+	bool genchi30p4_isLoaded;
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > *genchi20p4_;
+	TBranch *genchi20p4_branch;
+	bool genchi20p4_isLoaded;
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > *genchi10p4_3_;
+	TBranch *genchi10p4_3_branch;
+	bool genchi10p4_3_isLoaded;
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > *genchi10p4_2_;
+	TBranch *genchi10p4_2_branch;
+	bool genchi10p4_2_isLoaded;
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > *genbquark1_;
 	TBranch *genbquark1_branch;
 	bool genbquark1_isLoaded;
@@ -1190,6 +1220,26 @@ void Init(TTree *tree) {
 	if (tree->GetBranch("bjet4") != 0) {
 		bjet4_branch = tree->GetBranch("bjet4");
 		if (bjet4_branch) {bjet4_branch->SetAddress(&bjet4_);}
+	}
+	genchi30p4_branch = 0;
+	if (tree->GetBranch("genchi30p4") != 0) {
+		genchi30p4_branch = tree->GetBranch("genchi30p4");
+		if (genchi30p4_branch) {genchi30p4_branch->SetAddress(&genchi30p4_);}
+	}
+	genchi20p4_branch = 0;
+	if (tree->GetBranch("genchi20p4") != 0) {
+		genchi20p4_branch = tree->GetBranch("genchi20p4");
+		if (genchi20p4_branch) {genchi20p4_branch->SetAddress(&genchi20p4_);}
+	}
+	genchi10p4_3_branch = 0;
+	if (tree->GetBranch("genchi10p4_3") != 0) {
+		genchi10p4_3_branch = tree->GetBranch("genchi10p4_3");
+		if (genchi10p4_3_branch) {genchi10p4_3_branch->SetAddress(&genchi10p4_3_);}
+	}
+	genchi10p4_2_branch = 0;
+	if (tree->GetBranch("genchi10p4_2") != 0) {
+		genchi10p4_2_branch = tree->GetBranch("genchi10p4_2");
+		if (genchi10p4_2_branch) {genchi10p4_2_branch->SetAddress(&genchi10p4_2_);}
 	}
 	genbquark1_branch = 0;
 	if (tree->GetBranch("genbquark1") != 0) {
@@ -2582,6 +2632,36 @@ void Init(TTree *tree) {
 		l2j1_branch = tree->GetBranch("l2j1");
 		if (l2j1_branch) {l2j1_branch->SetAddress(&l2j1_);}
 	}
+	lep1iso_branch = 0;
+	if (tree->GetBranch("lep1iso") != 0) {
+		lep1iso_branch = tree->GetBranch("lep1iso");
+		if (lep1iso_branch) {lep1iso_branch->SetAddress(&lep1iso_);}
+	}
+	lep2iso_branch = 0;
+	if (tree->GetBranch("lep2iso") != 0) {
+		lep2iso_branch = tree->GetBranch("lep2iso");
+		if (lep2iso_branch) {lep2iso_branch->SetAddress(&lep2iso_);}
+	}
+	lep1D0_branch = 0;
+	if (tree->GetBranch("lep1D0") != 0) {
+		lep1D0_branch = tree->GetBranch("lep1D0");
+		if (lep1D0_branch) {lep1D0_branch->SetAddress(&lep1D0_);}
+	}
+	lep2D0_branch = 0;
+	if (tree->GetBranch("lep2D0") != 0) {
+		lep2D0_branch = tree->GetBranch("lep2D0");
+		if (lep2D0_branch) {lep2D0_branch->SetAddress(&lep2D0_);}
+	}
+	lep1Dz_branch = 0;
+	if (tree->GetBranch("lep1Dz") != 0) {
+		lep1Dz_branch = tree->GetBranch("lep1Dz");
+		if (lep1Dz_branch) {lep1Dz_branch->SetAddress(&lep1Dz_);}
+	}
+	lep2Dz_branch = 0;
+	if (tree->GetBranch("lep2Dz") != 0) {
+		lep2Dz_branch = tree->GetBranch("lep2Dz");
+		if (lep2Dz_branch) {lep2Dz_branch->SetAddress(&lep2Dz_);}
+	}
 	pfTau_leadPtcandID_branch = 0;
 	if (tree->GetBranch("pfTau_leadPtcandID") != 0) {
 		pfTau_leadPtcandID_branch = tree->GetBranch("pfTau_leadPtcandID");
@@ -3017,6 +3097,12 @@ void GetEntry(unsigned int idx)
 		l2j2_isLoaded = false;
 		l1j2_isLoaded = false;
 		l2j1_isLoaded = false;
+		lep1iso_isLoaded = false;
+		lep2iso_isLoaded = false;
+		lep1D0_isLoaded = false;
+		lep2D0_isLoaded = false;
+		lep1Dz_isLoaded = false;
+		lep2Dz_isLoaded = false;
 		dilep_isLoaded = false;
 		dileppf_isLoaded = false;
 		w_isLoaded = false;
@@ -3056,6 +3142,10 @@ void GetEntry(unsigned int idx)
 		bjet2_isLoaded = false;
 		bjet3_isLoaded = false;
 		bjet4_isLoaded = false;
+		genchi30p4_isLoaded = false;
+		genchi20p4_isLoaded = false;
+		genchi10p4_3_isLoaded = false;
+		genchi10p4_2_isLoaded = false;
 		genbquark1_isLoaded = false;
 		genbquark2_isLoaded = false;
 		genbquark3_isLoaded = false;
@@ -3362,6 +3452,12 @@ void LoadAllBranches()
 	if (l2j2_branch != 0) l2j2();
 	if (l1j2_branch != 0) l1j2();
 	if (l2j1_branch != 0) l2j1();
+	if (lep1iso_branch != 0) lep1iso();
+	if (lep2iso_branch != 0) lep2iso();
+	if (lep1D0_branch != 0) lep1D0();
+	if (lep2D0_branch != 0) lep2D0();
+	if (lep1Dz_branch != 0) lep1Dz();
+	if (lep2Dz_branch != 0) lep2Dz();
 	if (dilep_branch != 0) dilep();
 	if (dileppf_branch != 0) dileppf();
 	if (w_branch != 0) w();
@@ -3401,6 +3497,10 @@ void LoadAllBranches()
 	if (bjet2_branch != 0) bjet2();
 	if (bjet3_branch != 0) bjet3();
 	if (bjet4_branch != 0) bjet4();
+	if (genchi30p4_branch != 0) genchi30p4();
+	if (genchi20p4_branch != 0) genchi20p4();
+	if (genchi10p4_3_branch != 0) genchi10p4_3();
+	if (genchi10p4_2_branch != 0) genchi10p4_2();
 	if (genbquark1_branch != 0) genbquark1();
 	if (genbquark2_branch != 0) genbquark2();
 	if (genbquark3_branch != 0) genbquark3();
@@ -7470,6 +7570,96 @@ void LoadAllBranches()
 		}
 		return l2j1_;
 	}
+	float &lep1iso()
+	{
+		if (not lep1iso_isLoaded) {
+			if (lep1iso_branch != 0) {
+				lep1iso_branch->GetEntry(index);
+				#ifdef PARANOIA
+				#endif // #ifdef PARANOIA
+			} else { 
+				printf("branch lep1iso_branch does not exist!\n");
+				exit(1);
+			}
+			lep1iso_isLoaded = true;
+		}
+		return lep1iso_;
+	}
+	float &lep2iso()
+	{
+		if (not lep2iso_isLoaded) {
+			if (lep2iso_branch != 0) {
+				lep2iso_branch->GetEntry(index);
+				#ifdef PARANOIA
+				#endif // #ifdef PARANOIA
+			} else { 
+				printf("branch lep2iso_branch does not exist!\n");
+				exit(1);
+			}
+			lep2iso_isLoaded = true;
+		}
+		return lep2iso_;
+	}
+	float &lep1D0()
+	{
+		if (not lep1D0_isLoaded) {
+			if (lep1D0_branch != 0) {
+				lep1D0_branch->GetEntry(index);
+				#ifdef PARANOIA
+				#endif // #ifdef PARANOIA
+			} else { 
+				printf("branch lep1D0_branch does not exist!\n");
+				exit(1);
+			}
+			lep1D0_isLoaded = true;
+		}
+		return lep1D0_;
+	}
+	float &lep2D0()
+	{
+		if (not lep2D0_isLoaded) {
+			if (lep2D0_branch != 0) {
+				lep2D0_branch->GetEntry(index);
+				#ifdef PARANOIA
+				#endif // #ifdef PARANOIA
+			} else { 
+				printf("branch lep2D0_branch does not exist!\n");
+				exit(1);
+			}
+			lep2D0_isLoaded = true;
+		}
+		return lep2D0_;
+	}
+	float &lep1Dz()
+	{
+		if (not lep1Dz_isLoaded) {
+			if (lep1Dz_branch != 0) {
+				lep1Dz_branch->GetEntry(index);
+				#ifdef PARANOIA
+				#endif // #ifdef PARANOIA
+			} else { 
+				printf("branch lep1Dz_branch does not exist!\n");
+				exit(1);
+			}
+			lep1Dz_isLoaded = true;
+		}
+		return lep1Dz_;
+	}
+	float &lep2Dz()
+	{
+		if (not lep2Dz_isLoaded) {
+			if (lep2Dz_branch != 0) {
+				lep2Dz_branch->GetEntry(index);
+				#ifdef PARANOIA
+				#endif // #ifdef PARANOIA
+			} else { 
+				printf("branch lep2Dz_branch does not exist!\n");
+				exit(1);
+			}
+			lep2Dz_isLoaded = true;
+		}
+		return lep2Dz_;
+	}
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &dilep()
 	{
 		if (not dilep_isLoaded) {
@@ -8234,6 +8424,90 @@ void LoadAllBranches()
 			bjet4_isLoaded = true;
 		}
 		return *bjet4_;
+	}
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi30p4()
+	{
+		if (not genchi30p4_isLoaded) {
+			if (genchi30p4_branch != 0) {
+				genchi30p4_branch->GetEntry(index);
+				#ifdef PARANOIA
+				int e;
+				frexp(genchi30p4_->pt(), &e);
+				if (not isfinite(genchi30p4_->pt()) || e > 30) {
+					printf("branch genchi30p4_branch contains a bad float: %f\n", genchi30p4_->pt());
+					exit(1);
+				}
+				#endif // #ifdef PARANOIA
+			} else { 
+				printf("branch genchi30p4_branch does not exist!\n");
+				exit(1);
+			}
+			genchi30p4_isLoaded = true;
+		}
+		return *genchi30p4_;
+	}
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi20p4()
+	{
+		if (not genchi20p4_isLoaded) {
+			if (genchi20p4_branch != 0) {
+				genchi20p4_branch->GetEntry(index);
+				#ifdef PARANOIA
+				int e;
+				frexp(genchi20p4_->pt(), &e);
+				if (not isfinite(genchi20p4_->pt()) || e > 30) {
+					printf("branch genchi20p4_branch contains a bad float: %f\n", genchi20p4_->pt());
+					exit(1);
+				}
+				#endif // #ifdef PARANOIA
+			} else { 
+				printf("branch genchi20p4_branch does not exist!\n");
+				exit(1);
+			}
+			genchi20p4_isLoaded = true;
+		}
+		return *genchi20p4_;
+	}
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi10p4_3()
+	{
+		if (not genchi10p4_3_isLoaded) {
+			if (genchi10p4_3_branch != 0) {
+				genchi10p4_3_branch->GetEntry(index);
+				#ifdef PARANOIA
+				int e;
+				frexp(genchi10p4_3_->pt(), &e);
+				if (not isfinite(genchi10p4_3_->pt()) || e > 30) {
+					printf("branch genchi10p4_3_branch contains a bad float: %f\n", genchi10p4_3_->pt());
+					exit(1);
+				}
+				#endif // #ifdef PARANOIA
+			} else { 
+				printf("branch genchi10p4_3_branch does not exist!\n");
+				exit(1);
+			}
+			genchi10p4_3_isLoaded = true;
+		}
+		return *genchi10p4_3_;
+	}
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi10p4_2()
+	{
+		if (not genchi10p4_2_isLoaded) {
+			if (genchi10p4_2_branch != 0) {
+				genchi10p4_2_branch->GetEntry(index);
+				#ifdef PARANOIA
+				int e;
+				frexp(genchi10p4_2_->pt(), &e);
+				if (not isfinite(genchi10p4_2_->pt()) || e > 30) {
+					printf("branch genchi10p4_2_branch contains a bad float: %f\n", genchi10p4_2_->pt());
+					exit(1);
+				}
+				#endif // #ifdef PARANOIA
+			} else { 
+				printf("branch genchi10p4_2_branch does not exist!\n");
+				exit(1);
+			}
+			genchi10p4_2_isLoaded = true;
+		}
+		return *genchi10p4_2_;
 	}
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genbquark1()
 	{
@@ -9068,6 +9342,12 @@ namespace ZMet {
 	float &l2j2();
 	float &l1j2();
 	float &l2j1();
+	float &lep1iso();
+	float &lep2iso();
+	float &lep1D0();
+	float &lep2D0();
+	float &lep1Dz();
+	float &lep2Dz();
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &dilep();
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &dileppf();
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &w();
@@ -9107,6 +9387,10 @@ namespace ZMet {
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &bjet2();
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &bjet3();
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &bjet4();
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi30p4();
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi20p4();
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi10p4_3();
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi10p4_2();
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genbquark1();
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genbquark2();
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genbquark3();

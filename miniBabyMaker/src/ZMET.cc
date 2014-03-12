@@ -270,6 +270,12 @@ namespace ZMet {
 	float &l2j2() { return zmet.l2j2(); }
 	float &l1j2() { return zmet.l1j2(); }
 	float &l2j1() { return zmet.l2j1(); }
+	float &lep1iso() { return zmet.lep1iso(); }
+	float &lep2iso() { return zmet.lep2iso(); }
+	float &lep1D0() { return zmet.lep1D0(); }
+	float &lep2D0() { return zmet.lep2D0(); }
+	float &lep1Dz() { return zmet.lep1Dz(); }
+	float &lep2Dz() { return zmet.lep2Dz(); }
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &dilep() { return zmet.dilep(); }
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &dileppf() { return zmet.dileppf(); }
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &w() { return zmet.w(); }
@@ -309,6 +315,10 @@ namespace ZMet {
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &bjet2() { return zmet.bjet2(); }
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &bjet3() { return zmet.bjet3(); }
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &bjet4() { return zmet.bjet4(); }
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi30p4() { return zmet.genchi30p4(); }
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi20p4() { return zmet.genchi20p4(); }
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi10p4_3() { return zmet.genchi10p4_3(); }
+	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genchi10p4_2() { return zmet.genchi10p4_2(); }
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genbquark1() { return zmet.genbquark1(); }
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genbquark2() { return zmet.genbquark2(); }
 	ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &genbquark3() { return zmet.genbquark3(); }
