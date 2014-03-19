@@ -9,7 +9,7 @@
 
 using namespace std;
 
-int runMainTemplateLooper( string filesuffix = "" ){
+int runMainTemplateLooper( string dataset = "", string filesuffix = "" ){
 
   gSystem->AddIncludePath(" -Iinclude");
   gSystem->Load("libScanChain.so");
@@ -21,6 +21,7 @@ int runMainTemplateLooper( string filesuffix = "" ){
 
   // string sample = "closure_";
   string sample = "data_";
+  if( dataset != "" ) sample = dataset;
 
   string suffix = filesuffix;
   
@@ -28,15 +29,30 @@ int runMainTemplateLooper( string filesuffix = "" ){
   vector <string> samples;
   cout<<"Chaining up ntuples"<<endl;
   
-  if(sample == "data_"){
+  if(sample == "data"){
 	
-
-	// samples.push_back("data_53X_2012A_baby_nojson.root");
-	// samples.push_back("data_53X_2012B_baby_nojson.root");
+	// ch->Add("output/V00-02-21/edge_sync_newvars_baby.root"); 
+	ch->Add("output/V00-02-21/data_53X_2012A_recover_06Aug2012_baby_nojson.root");
+	samples.push_back("data_53X_2012A_baby_nojson.root");
+	samples.push_back("data_53X_2012B_baby_nojson.root");
 	ch->Add("/home/users/cwelke/ZHmet_2013/output/V00-02-21/data_53X_2012C_ecalreco_baby_nojson.root");
-	// samples.push_back("data_53X_2012C_baby_nojson.root");
-	// samples.push_back("data_53X_2012D_baby_nojson.root");
+	samples.push_back("data_53X_2012C_baby_nojson.root");
+	samples.push_back("data_53X_2012D_baby_nojson.root");
 
+
+  }else if(sample == "data2012A"){
+	ch->Add("output/V00-02-21/data_53X_2012A_recover_06Aug2012_baby_nojson.root");
+	samples.push_back("data_53X_2012A_baby_nojson.root");
+
+  }else if(sample == "data2012B"){
+	samples.push_back("data_53X_2012B_baby_nojson.root");
+
+  }else if(sample == "data2012C"){
+	ch->Add("/home/users/cwelke/ZHmet_2013/output/V00-02-21/data_53X_2012C_ecalreco_baby_nojson.root");
+	samples.push_back("data_53X_2012C_baby_nojson.root");
+
+  }else if(sample == "data2012D"){
+		samples.push_back("data_53X_2012D_baby_nojson.root");
 
   }else if(sample == "closure_"){
 
@@ -52,13 +68,17 @@ int runMainTemplateLooper( string filesuffix = "" ){
 	// samples.push_back("zjetsmc_ee_baby.root");
 	// samples.push_back("zjetsmc_mm_baby.root");
 
+  }else{
+	cout<<"dataset: "<<sample<<" not found. Exiting."<<endl;
+    return(1);
   }
+
 
   for( size_t ind = 0; ind < samples.size(); ind++ ){
 	ch->Add( Form( "%s/%s", ntuples.c_str(), samples.at(ind).c_str() ) );
   }
 
-  miniBabyMaker looper;// = new mainTemplateLooper();
+  miniBabyMaker looper(sample);// = new mainTemplateLooper();
   
   cout<<"running looper for: "<<suffix<<endl;
   looper.ScanChain(ch, -1, suffix); 
