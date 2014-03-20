@@ -50,7 +50,7 @@ miniBabyMaker::miniBabyMaker()
 
   babyTree_ = NULL;
   babyFile_ = NULL;
-  luminosity = 1.0;
+  luminosity_ = 1.0;
 
   MakeBabyNtuple();
 
@@ -344,7 +344,7 @@ int miniBabyMaker::ScanChain( TChain * chain, int nEvents, string suffix ){
   delete bmark;
 
   cout<<"Writing baby to: "<<babyFileName_<<endl;
-  babyFile_->cd();
+  // babyFile_->cd();
   babyFile_->Write();
   babyFile_->Close();
   return 0;
@@ -473,7 +473,7 @@ void miniBabyMaker::Initialize()
   jet4_ = 0;
 
   njets_ = -999;
-  ht_ = -999.9;
+  ht_    = -999.9;
 
   mjj_ = -999.9;//leading jets
   ptjj_ = -999.9;
@@ -505,7 +505,7 @@ void miniBabyMaker::Initialize()
   nbcsvm_old_ = -999;
   nbcsvt_old_ = -999;
 
-  mbb_ = -999.9;
+  mbb_  = -999.9;
   ptbb_ = -999.9;
   mt2b_ = -999.9;
 
@@ -516,7 +516,7 @@ void miniBabyMaker::Initialize()
   lep2_ = 0;
   lep3_ = 0;
 
-  mll_ = -999.9;//leading leps
+  mll_  = -999.9;//leading leps
   ptll_ = -999.9;
 
   hastau_ = false;
