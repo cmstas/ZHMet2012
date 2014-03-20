@@ -79,6 +79,10 @@ int runMainTemplateLooper( string dataset = "", string filesuffix = "" ){
   }
 
   miniBabyMaker looper(sample);// = new mainTemplateLooper();
+
+// Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt
+  looper.SetGoodRun( "json/alldata_flat.txt" );
+  looper.SetLuminosity( 19.5 );
   
   cout<<"running looper for: "<<suffix<<endl;
   looper.ScanChain(ch, -1, suffix); 

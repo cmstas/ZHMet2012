@@ -28,6 +28,8 @@ public:
   ~miniBabyMaker();
   
   int ScanChain( TChain * chain, int nEvents = -1, std::string suffix = "" );
+  void SetGoodRun( std::string filename );
+  void SetLuminosity( float luminosity );
 
 private:
   
@@ -35,7 +37,9 @@ private:
   void Initialize();
   void FillBabyNtuple();
 
-  float luminosity;
+  float luminosity_;
+
+  std::string goodrunfilename_;
 
   //Tree pointer
   TTree * babyTree_;

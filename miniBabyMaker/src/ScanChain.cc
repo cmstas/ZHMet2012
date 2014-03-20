@@ -45,13 +45,12 @@ using namespace std;
 
 miniBabyMaker::miniBabyMaker()
 {
-
   babyFileName_ = "test_baby.root";
+  goodrunfilename_ = "";
 
   babyTree_ = NULL;
-
   babyFile_ = NULL;
-  luminosity = 19.5;
+  luminosity = 1.0;
 
   MakeBabyNtuple();
 
@@ -59,13 +58,12 @@ miniBabyMaker::miniBabyMaker()
 
 miniBabyMaker::miniBabyMaker( string babyfilename = "test" )
 {
-
   babyFileName_ = Form("%s_baby.root", babyfilename.c_str());
+  goodrunfilename_ = "";
 
   babyTree_ = NULL;
-
   babyFile_ = NULL;
-  luminosity = 19.5;
+  luminosity_ = 1.0;
 
   MakeBabyNtuple();
 
@@ -73,8 +71,6 @@ miniBabyMaker::miniBabyMaker( string babyfilename = "test" )
 
 miniBabyMaker::~miniBabyMaker(){
   delete babyFile_;
-  // delete templatefile_;
-  // delete templatefile_;
 }
 
 int miniBabyMaker::ScanChain( TChain * chain, int nEvents, string suffix ){
@@ -107,17 +103,11 @@ int miniBabyMaker::ScanChain( TChain * chain, int nEvents, string suffix ){
   //~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-
   //set json file
   //~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-
-  // set_goodrun_file("/home/users/benhoob/ZMet2012/jsons/final_19p47fb_cms2.txt");
+  if( goodrunfilename_ != "" ) set_goodrun_file(goodrunfilename_.c_str());
 
-  //json for moriond
-  // set_goodrun_file("/home/users/benhoob/ZMet2012/jsons/Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt");
-  // set_goodrun_file_json("/home/users/cwelke/ZAnalysis/Spring2013/mainLooper/all2012.txt");
-  set_goodrun_file("json/alldata_flat.txt");
-  // set_goodrun_file("json/Run2012A-recover-06Aug_flat.txt");
-
-  //json for hcp
-  // set_goodrun_file("/home/users/benhoob/ZMet2012/jsons/Cert_190456-208686_8TeV_PromptReco_Collisions12_JSON_goodruns.txt");
-
+  //~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-
+  //Start file loop
+  //~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-
   while ( (currentFile = (TFile*)fileIter.Next()) ) {
 
     // Get File Content
@@ -148,11 +138,16 @@ int miniBabyMaker::ScanChain( TChain * chain, int nEvents, string suffix ){
 	  Initialize();
 
 	  //parse events from json
-	  if( zmet.isdata() ){
-		if( !goodrun_json( zmet.run(), zmet.lumi() ) ){
-		  nBadEvents++;
-		  continue;
+	  if( goodrunfilename_ != "" ){
+		if( zmet.isdata() ){
+		  if( !goodrun_json( zmet.run(), zmet.lumi() ) ){
+			nBadEvents++;
+			continue;
+		  }
 		}
+	  }
+
+	  if( zmet.isdata() ){
 		DorkyEventIdentifier id = { zmet.run(), zmet.event(), zmet.lumi() };
 		if ( is_duplicate( id ) ){
 		  // cout << "\t! ERROR: found duplicate." << endl;
@@ -168,7 +163,7 @@ int miniBabyMaker::ScanChain( TChain * chain, int nEvents, string suffix ){
 	  if( !zmet.isdata() ){
 		weight *= zmet.vtxweight();
 		weight *= zmet.trgeff();	   
-	  	weight *= luminosity;
+	  	weight *= luminosity_;
 	  }else if (zmet.isdata()                                                            ){
 	  	weight = 1;
 	  }
@@ -362,7 +357,7 @@ void miniBabyMaker::MakeBabyNtuple()
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
   rootdir->cd();
 
-  babyFile_ = new TFile(Form("output/%s", babyFileName_.c_str()), "RECREATE");
+  babyFile_ = new TFile(Form("output/miniBabies/%s", babyFileName_.c_str()), "RECREATE");
   babyFile_->cd();
   babyTree_ = new TTree("T1", "mini baby for Z-Analysis");
 
@@ -551,3 +546,14 @@ void miniBabyMaker::FillBabyNtuple()
   babyTree_->Fill();
 }
 
+void miniBabyMaker::SetGoodRun( std::string filename )
+{
+  std::cout<<"Using json: "<<filename<<std::endl;
+  goodrunfilename_ = filename;
+}
+
+void miniBabyMaker::SetLuminosity( float luminosity )
+{
+  std::cout<<"Luminosity: "<<luminosity<<std::endl;
+  luminosity_ = luminosity;
+}
