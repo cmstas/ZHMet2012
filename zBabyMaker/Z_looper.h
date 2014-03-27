@@ -69,6 +69,9 @@ class Z_looper
   //histos
 
   VofP4 pujets_;
+  VofP4 pt40jets_;
+  VofP4 pt40csvs_;
+
   Int_t npujets_;
 
   // event stuff

@@ -22,19 +22,22 @@ fi
 # For inclusive result + edge
 selection="_inclusive_edge"
 
-dataset="data"
+# dataset="data"
+# run_looper $dataset $selection
+
+dataset="data2012A_recover_06Aug2012"
 run_looper $dataset $selection
 
-# dataset="data2012A"
-# run_looper $dataset $selection
+dataset="data2012A"
+run_looper $dataset $selection
+dataset="data2012B"
+run_looper $dataset $selection
+dataset="data2012C"
+run_looper $dataset $selection
+dataset="data2012D"
+run_looper $dataset $selection
 
-# dataset="data2012B"
-# run_looper $dataset $selection
-
-# dataset="data2012C"
-# run_looper $dataset $selection
-
-# dataset="data2012D"
+# dataset="zjets"
 # run_looper $dataset $selection
 
 # selection="_inclusive_edge_3jinc"
