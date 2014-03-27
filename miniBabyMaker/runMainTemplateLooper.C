@@ -40,6 +40,9 @@ int runMainTemplateLooper( string dataset = "", string filesuffix = "" ){
 	samples.push_back("data_53X_2012D_baby_nojson.root");
 
 
+  }else if(sample == "data2012A_recover_06Aug2012"){
+	ch->Add("output/V00-02-21/data_53X_2012A_recover_06Aug2012_baby_nojson.root");
+
   }else if(sample == "data2012A"){
 	ch->Add("output/V00-02-21/data_53X_2012A_recover_06Aug2012_baby_nojson.root");
 	samples.push_back("data_53X_2012A_baby_nojson.root");
@@ -54,6 +57,13 @@ int runMainTemplateLooper( string dataset = "", string filesuffix = "" ){
   }else if(sample == "data2012D"){
 		samples.push_back("data_53X_2012D_baby_nojson.root");
 
+  }else if(sample == "zjets"){
+	samples.push_back("zjets_53X_slim_baby.root");
+	samples.push_back("z1jet_53X_slim__baby.root");
+	samples.push_back("z2jet_53X_slim__baby.root");
+	samples.push_back("z3jet_53X_slim__baby.root");
+	samples.push_back("z4jet_53X_slim__baby.root");
+
   }else if(sample == "closure_"){
 
 
@@ -64,9 +74,6 @@ int runMainTemplateLooper( string dataset = "", string filesuffix = "" ){
 	samples.push_back("z4jet_53X_slim__baby.root");
 
 	// samples.push_back("zbb2l_53X_slim_baby.root");
-
-	// samples.push_back("zjetsmc_ee_baby.root");
-	// samples.push_back("zjetsmc_mm_baby.root");
 
   }else{
 	cout<<"dataset: "<<sample<<" not found. Exiting."<<endl;
@@ -83,6 +90,8 @@ int runMainTemplateLooper( string dataset = "", string filesuffix = "" ){
   // looper.SetGoodRun( "json/Merged_190456-208686_8TeV_PromptReReco_Collisions12_goodruns.txt");
   looper.SetGoodRun( "json/alldata_flat.txt" );
   looper.SetLuminosity( 19.5 );
+  looper.SetCSVWorkingPoint( 0.679 );
+  looper.SetBTagShapeInterface( "/home/users/cwelke/CMSSW/CMSSW_5_3_2_patch4/src/CMS2/NtupleMacros/Tools/BTagReshaping/csvdiscr.root" );
   
   cout<<"running looper for: "<<suffix<<endl;
   looper.ScanChain(ch, -1, suffix); 

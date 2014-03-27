@@ -29,10 +29,6 @@
 #include "genbtagTools.h"
 #include "jetUtils.h"
 
-
-//stuff from tools/BTagReshaping
-#include "BTagReshaping.h"
-
 //stuff from include
 #include "ScanChain.h"
 #include "ZMET.h"
@@ -50,7 +46,10 @@ miniBabyMaker::miniBabyMaker()
 
   babyTree_ = NULL;
   babyFile_ = NULL;
+  nominalShape_ = NULL;
+
   luminosity_ = 1.0;
+  csvWorkingPoint_ = 0.0;
 
   MakeBabyNtuple();
 
@@ -63,7 +62,10 @@ miniBabyMaker::miniBabyMaker( string babyfilename = "test" )
 
   babyTree_ = NULL;
   babyFile_ = NULL;
+  nominalShape_ = NULL;
+
   luminosity_ = 1.0;
+  csvWorkingPoint_ = 0.0;
 
   MakeBabyNtuple();
 
@@ -206,12 +208,21 @@ int miniBabyMaker::ScanChain( TChain * chain, int nEvents, string suffix ){
 
 	  int evt_njets = 0;
 	  float evt_ht  = 0;
-		evt_njets = zmet.njets40();
-		evt_ht    = zmet.ht40();
+	  evt_njets = zmet.njets40();
+	  evt_ht    = zmet.ht40();
+
+	  std::vector <float> csvvals;
+	  reshapeCSV( csvvals );
+	  
+	  // if( evt_njets < 2 ) continue;
+	  // if( !(evt_ht > 0.0) ) continue;
 
 
-	  if( evt_njets < 2 ) continue;
-	  if( !(evt_ht > 0.0) ) continue;
+	  if( TString(currentFile->GetTitle()).Contains("zjets_") ) {
+	  	if( zmet.nwzpartons() > 0 ){
+	  	  continue;
+	  	}
+	  }
 
 	  //*****************************
 	  //set branch variables
@@ -234,11 +245,16 @@ int miniBabyMaker::ScanChain( TChain * chain, int nEvents, string suffix ){
 	  if( evt_njets > 0 ){
 		jet1_    = &zmet.jet1();
 		csv1_old_ = zmet.csv1();
+		csv1_ = csvvals.at(0);
+		if( csv1_ > 0.679 ) bjet1_    = &zmet.jet1();
 	  }
 
 	  if( evt_njets > 1 ){
 		jet2_    = &zmet.jet2();
 		csv2_old_ = zmet.csv2();
+		csv2_ = csvvals.at(1);
+		if( csv2_ > 0.679 ) bjet2_    = &zmet.jet2();
+
 		mjj_  = ( zmet.jet1() + zmet.jet2() ).mass();
 		ptjj_ = ( zmet.jet1() + zmet.jet2() ).pt();
 		mt2j_ = zmet.mt2j();
@@ -247,42 +263,68 @@ int miniBabyMaker::ScanChain( TChain * chain, int nEvents, string suffix ){
 	  if( evt_njets > 2 ){
 		jet3_    = &zmet.jet3();
 		csv3_old_ = zmet.csv3();
+		csv3_ = csvvals.at(2);
+		if( csv3_ > 0.679 ) bjet3_    = &zmet.jet3();
 	  }
 
 	  if( evt_njets > 3 ){
 		jet4_    = &zmet.jet4();
 		csv4_old_ = zmet.csv4();
+		csv4_ = csvvals.at(3);
+		if( csv4_ > 0.679 ) bjet4_    = &zmet.jet4();
 	  }
 
 	  njets_ = evt_njets;
 	  ht_    = evt_ht;
 
 	  // //add these later
-	  // babyTree_->Branch("csv1",      &csv1_,       "csv1/F" );
-	  // babyTree_->Branch("csv2",      &csv2_,       "csv2/F" );
-	  // babyTree_->Branch("csv3",      &csv3_,       "csv3/F" );
-	  // babyTree_->Branch("csv4",      &csv4_,       "csv4/F" );
-
 	  // //-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
 	  // //bjet variables - assume medium btagging unless otherwise specified
 	  // //-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
-	  // bjet1_ = 0;
-	  // bjet2_ = 0;
-	  // bjet3_ = 0;
-	  // bjet4_ = 0;
+	  for( size_t csvi = 0; csvi < evt_njets && csvi < csvvals.size(); csvi++ ){
+		if( csvvals.at(csvi) > 0.244 ) nbcsvl_++;
+		if( csvvals.at(csvi) > 0.679 ) nbcsvm_++;
+		if( csvvals.at(csvi) > 0.898 ) nbcsvt_++;
+	  }
 
-	  // nbcsvl_ = -999;
-	  // nbcsvm_ = -999;
-	  // nbcsvt_ = -999;
+	  if( nbcsvm_ >= 2 ){
+
+	  	//get leps
+	  	vector <LorentzVector> leps;
+	  	leps.push_back(zmet.lep1());
+	  	leps.push_back(zmet.lep2());
+
+	  	//get jets
+	  	vector <LorentzVector> jets;
+	  	vector <float> newcsvvals;
+	  	if( evt_njets >= 1 ){ 
+		  jets.push_back(zmet.jet1()); 
+		  newcsvvals.push_back(csvvals.at(0)); 
+		} if( evt_njets >= 2 ){ 
+		  jets.push_back(zmet.jet2()); 		  
+		  newcsvvals.push_back(csvvals.at(1)); 
+		} if( evt_njets >= 3 ){ 
+		  jets.push_back(zmet.jet3()); 
+		  newcsvvals.push_back(csvvals.at(2)); 
+		} if( evt_njets >= 4 ){ 
+		  jets.push_back(zmet.jet4()); 
+		  newcsvvals.push_back(csvvals.at(3)); 
+		}
+
+	  	//get bjets
+	  	vector <LorentzVector> newbjets = get_bjets( jets, newcsvvals, csvWorkingPoint_ );
+
+	  	//get mjj
+	  	mbb_  = getMbb_multijets(  jets, newcsvvals, csvWorkingPoint_ );
+	  	ptbb_ = getPTbb_multijets( jets, newcsvvals, csvWorkingPoint_ );
+
+	  	//get mT2j
+	  	mt2b_ = getMT2bInc( leps, newbjets, zmet.pfmet(), zmet.pfmetphi() );
+	  }
 
 	  // nbcsvl_old_ = -999;
 	  // nbcsvm_old_ = -999;
 	  // nbcsvt_old_ = -999;
-
-	  // mbb_ = -999.9;
-	  // ptbb_ = -999.9;
-	  // mt2b_ = -999.9;
-
 
 	  //-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~
 	  //lepton variables
@@ -497,13 +539,13 @@ void miniBabyMaker::Initialize()
   bjet3_ = 0;
   bjet4_ = 0;
 
-  nbcsvl_ = -999;
-  nbcsvm_ = -999;
-  nbcsvt_ = -999;
+  nbcsvl_ = 0;
+  nbcsvm_ = 0;
+  nbcsvt_ = 0;
 
-  nbcsvl_old_ = -999;
-  nbcsvm_old_ = -999;
-  nbcsvt_old_ = -999;
+  nbcsvl_old_ = 0;
+  nbcsvm_old_ = 0;
+  nbcsvt_old_ = 0;
 
   mbb_  = -999.9;
   ptbb_ = -999.9;
@@ -546,14 +588,53 @@ void miniBabyMaker::FillBabyNtuple()
   babyTree_->Fill();
 }
 
+void miniBabyMaker::reshapeCSV( std::vector <float> &csvvals )
+{
+  if( csvvals.size() > 0 )  csvvals.clear();
+
+  if( zmet.isdata() ){
+    csvvals.push_back(zmet.csv1());
+    csvvals.push_back(zmet.csv2());
+    csvvals.push_back(zmet.csv3());
+    csvvals.push_back(zmet.csv4());
+
+  }else if( !zmet.isdata() ){
+	csvvals.push_back(nominalShape_->reshape(zmet.jet1().Eta(), zmet.jet1().Pt(), zmet.csv1(), zmet.jet1mcfa()));
+	csvvals.push_back(nominalShape_->reshape(zmet.jet2().Eta(), zmet.jet2().Pt(), zmet.csv2(), zmet.jet2mcfa()));
+	csvvals.push_back(nominalShape_->reshape(zmet.jet3().Eta(), zmet.jet3().Pt(), zmet.csv3(), zmet.jet3mcfa()));
+	csvvals.push_back(nominalShape_->reshape(zmet.jet4().Eta(), zmet.jet4().Pt(), zmet.csv4(), zmet.jet4mcfa()));
+  }
+  return;
+}
+
 void miniBabyMaker::SetGoodRun( std::string filename )
 {
   std::cout<<"Using json: "<<filename<<std::endl;
   goodrunfilename_ = filename;
+  return;
 }
 
 void miniBabyMaker::SetLuminosity( float luminosity )
 {
   std::cout<<"Luminosity: "<<luminosity<<std::endl;
   luminosity_ = luminosity;
+  return;
 }
+
+void miniBabyMaker::SetCSVWorkingPoint( float workingpoint )
+{
+  if( abs(workingpoint - 0.244) < 0.1 ) std::cout<<"CSV WP - Loose"<<std::endl;
+  if( abs(workingpoint - 0.679) < 0.1 ) std::cout<<"CSV WP - Medium"<<std::endl;
+  if( abs(workingpoint - 0.898) < 0.1 ) std::cout<<"CSV WP - Tight"<<std::endl;
+  csvWorkingPoint_ = workingpoint;
+  return;
+}
+
+void miniBabyMaker::SetBTagShapeInterface( std::string filename )
+{
+  std::cout<<"Using following file for b-tag reshaping: "<<filename<<std::endl;
+  nominalShape_ = new BTagShapeInterface( filename.c_str(), 0.0, 0.0); 
+  return;
+}
+
+

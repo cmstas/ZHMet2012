@@ -15,6 +15,10 @@
 
 // #include "ZMET.h"
 
+//stuff from tools/BTagReshaping
+#include "BTagReshaping.h"
+class BTagShapeInterface;
+
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 
 // ROOT
@@ -30,16 +34,23 @@ public:
   int ScanChain( TChain * chain, int nEvents = -1, std::string suffix = "" );
   void SetGoodRun( std::string filename );
   void SetLuminosity( float luminosity );
+  void SetBTagShapeInterface( std::string filename );
+  void SetCSVWorkingPoint( float workingpoint );
 
 private:
   
   void MakeBabyNtuple();
   void Initialize();
   void FillBabyNtuple();
+  void reshapeCSV( std::vector <float> &csvvals );
 
   float luminosity_;
 
   std::string goodrunfilename_;
+
+  BTagShapeInterface * nominalShape_;
+
+  float csvWorkingPoint_;
 
   //Tree pointer
   TTree * babyTree_;
