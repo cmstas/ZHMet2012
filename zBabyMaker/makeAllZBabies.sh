@@ -2,13 +2,22 @@
 
 . makeZBaby.sh
 
-versionnumber="V00-02-21"
+versionnumber="V00-02-22"
 
 make -j5
 if [ ! "$?" -eq "0" ]; then
 	echo "Did not Compile, Exiting"
 	exit
 fi
+
+# processsample edge_sync_newvars false $versionnumber
+
+# processsample data_53X_2012A_recover_06Aug2012 true $versionnumber
+
+processsample data_53X_2012D_16Jan2013 true $versionnumber &
+processsample data_53X_2012D true $versionnumber &
+processsample data_53X_2012C_24Aug2012 true $versionnumber &
+processsample data_53X_2012C true $versionnumber &
 
 # processsample zjetsmc_ee false $versionnumber
 # processsample zjetsmc_mm false $versionnumber
@@ -22,7 +31,7 @@ fi
 
 # processsample data_53X_2012A true $versionnumber
 # processsample data_53X_2012B true $versionnumber
-processsample data_53X_2012C_ecalreco true $versionnumber
+# processsample data_53X_2012C_ecalreco true $versionnumber
 # processsample data_53X_2012C true $versionnumber
 # processsample data_53X_2012D true $versionnumber
 

@@ -140,8 +140,25 @@ void doAllZ( string prefix, string ntuplenumber, bool isData, float kFactor, str
   
   if( ch->GetEntries() == 0 ){  
 
+	//edge sync DYJets MC-----------------------------------------------------------------------------------
+	if( prefix == "edge_sync" ){
+	  pickSkimIfExists(ch,"/nfs-7/userdata/cwelke/CMSSW_testing/DYJets_m50/merged/zjets_cms2_unprocessed_ntuple.root");
+	}
+
+	//edge sync data_53X_2012A_recover_06Aug2012-----------------------------------------------------------------------------------
+	else if( prefix == "data_53X_2012A_recover_06Aug2012" ){
+	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012A-recover-06Aug2012-v1_AOD/merged/merged*.root");
+	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleMu_Run2012A-recover-06Aug2012-v1_AOD/merged/merged*.root");
+	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/MuEG_Run2012A-recover-06Aug2012-v1_AOD/merged/merged_ntuple_*.root");
+	}
+
 	//zjets ee powheg-----------------------------------------------------------------------------------
-	if( prefix == "zjetsmc_ee" ){
+	else if( prefix == "edge_sync_newvars" ){
+	  pickSkimIfExists(ch,"/nfs-7/userdata/cwelke/CMSSW_testing/DYJets_m50/merged/zjets_cms2_unprocessed_ntuple.root");
+	}
+
+	//zjets ee powheg-----------------------------------------------------------------------------------
+	else if( prefix == "zjetsmc_ee" ){
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Summer12_53X_MC/DYToEE_M-20_CT10_TuneZ2star_v2_8TeV-powheg-pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1/V05-03-28/merged_ntuple_*");
 	}
 
@@ -187,19 +204,25 @@ void doAllZ( string prefix, string ntuplenumber, bool isData, float kFactor, str
 
 	}
 
-	else if( prefix == "data_53X_2012C" ){    
+	else if( prefix == "data_53X_2012C_24Aug2012" ){    
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-24Aug2012-v1_AOD/merged/merged*root");
-	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-PromptReco-v2_AOD/merged/merged*root");
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleMu_Run2012C-24Aug2012-v1_AOD/merged/merged*root");
-	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleMu_Run2012C-PromptReco-v2_AOD/merged/merged*root");
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/MuEG_Run2012C-24Aug2012-v1_AOD/merged/merged*root");
+	}
+
+	else if( prefix == "data_53X_2012C" ){    
+	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-PromptReco-v2_AOD/merged/merged*root");
+	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleMu_Run2012C-PromptReco-v2_AOD/merged/merged*root");
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/MuEG_Run2012C-PromptReco-v2_AOD/merged/merged*root");
 	}
 
-	else if( prefix == "data_53X_2012D" ){    
+	else if( prefix == "data_53X_2012D_16Jan2013" ){    
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012D-16Jan2013-v1_AOD/merged/merged*root");
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleMu_Run2012D-16Jan2013-v2_AOD/merged/merged*root");
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/MuEG_Run2012D-16Jan2013-v2_AOD/merged/merged*root");
+	}
+
+	else if( prefix == "data_53X_2012D" ){    
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012D-PromptReco-v1_AOD/merged/merged*root");
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleMu_Run2012D-PromptReco-v1_AOD/merged/merged*root");
 	  pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/MuEG_Run2012D-PromptReco-v1_AOD/merged/merged*root");

@@ -50,6 +50,8 @@ class Z_looper
   float getMetError(  vector<int> goodMuonIndices );
   float getMetError_claudio(  vector<int> goodMuonIndices );
   float gluinoPairCrossSection( float gluinomass );
+  float leptonD0(const int id, const int idx);
+  float leptonDz(const int id, const int idx);
 
   bool    initialized;
   TH1D*   gg_xsec_hist;
@@ -113,8 +115,8 @@ class Z_looper
   Float_t mbb_;
   Float_t mjjup_;
   Float_t mjjdn_;
-  Float_t ml_;
-  Float_t mg_;
+  Int_t   ml_;
+  Int_t   mg_;
   Float_t x_;
   Float_t btagweight_;
   Float_t btagweightup_;
@@ -226,6 +228,13 @@ class Z_looper
   LorentzVector*  gent_; 
   LorentzVector*  gentbar_; 
   LorentzVector*  genttbar_; 
+
+  Float_t lep1iso_;
+  Float_t lep2iso_;
+  Float_t lep1D0_;
+  Float_t lep2D0_;
+  Float_t lep1Dz_;
+  Float_t lep2Dz_;
 
   Float_t tche1_;
   Float_t tche2_;

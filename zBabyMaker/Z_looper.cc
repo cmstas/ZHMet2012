@@ -987,8 +987,8 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		}
 		
 	
-	  mg_ = -1.;
-	  ml_ = -1.; 
+	  mg_ = -1;
+	  ml_ = -1; 
 	  x_  = -1.;
 
 	  genmetcustom_ = 0;
@@ -1009,7 +1009,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		  else if( TString(prefix).Contains("wzsms") ){
 			mg_ = cms2.sparm_values().at(0);
 			ml_ = cms2.sparm_values().at(1);
-			x_  = -999;
+			x_  = -999.;
 
 			int   mgbin = xsec_C1N2->FindBin(mg_);
 			float xsec  = xsec_C1N2->GetBinContent(mgbin);
@@ -1165,8 +1165,8 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		if( foundDuplicate ) continue;
 
 		if( els_p4().at(iel).pt() < 10 )                                                             continue;
-		//if( els_p4().at(iel).pt() < 20 )                                                             continue; // SAMESIGN: pT > 20 GeV
 		if( ! passElectronSelection_ZMet2012_v3(iel,vetoTransition,vetoTransition,useOldIsolation) ) continue;
+
 		goodLeptons.push_back( els_p4().at(iel) );
 		goodLeptonIDs.push_back( els_charge().at(iel) * -11 );
 		nlep_++;
@@ -1176,17 +1176,8 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
               
 	  for( unsigned int imu = 0 ; imu < mus_p4().size(); ++imu ){
 
-		//if( nEventsTotal <= 100 ){
-		// printf("RelValZMM:   %u\t%u\t%u\t%4.3f\t%4.3f\t%4.3f\t%u\t%4.3f\n", 
-		// 	 evt_run() , evt_lumiBlock(), evt_event(), mus_p4().at(imu).pt(), mus_p4().at(imu).eta(), mus_p4().at(imu).phi(), 
-		// 	 muonIdNotIsolated( imu , ZMet2012_v1 ) , muonIsoValuePF2012_deltaBeta(imu) );
-		//}
-
 		if( mus_p4().at(imu).pt() < 10 )           continue;
-		if( !muonId( imu , ZMet2012_v1 ))          continue;
-
-		// if( mus_p4().at(imu).pt() < 20 )           continue; // SAMESIGN: pT > 20 GeV
-		// if( !muonId( imu , NominalSSv5 ))          continue; // SAMESIGN: NominalSSv5
+		if( !muonId( imu , ZMet2012_v1 ))          continue;//this is the correct line
 
 		goodLeptons.push_back( mus_p4().at(imu) );
 		goodLeptonIDs.push_back( mus_charge().at(imu) * -13 );
@@ -1336,6 +1327,20 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	  id1_  = hyp_ll_id()[hypIdx];
 	  id2_  = hyp_lt_id()[hypIdx];
 	
+	  //save electron isolation
+	  if( abs(id1_) == 11 )	lep1iso_ = electronIsoValuePF2012_FastJetEffArea_v3(index1, 0.3, 0, useOldIsolation);
+	  if( abs(id2_) == 11 )	lep2iso_ = electronIsoValuePF2012_FastJetEffArea_v3(index2, 0.3, 0, useOldIsolation);
+
+	  //save muon isolation
+	  if( abs(id1_) == 13 )	lep1iso_ = muonIsoValuePF2012_deltaBeta(index1);
+	  if( abs(id2_) == 13 )	lep2iso_ = muonIsoValuePF2012_deltaBeta(index2);
+
+	  //save lepton Dz and D0
+	  lep1D0_ = leptonD0(id1_, index1);
+	  lep2D0_ = leptonD0(id2_, index2);
+	  lep1Dz_ = leptonDz(id1_, index1);
+	  lep2Dz_ = leptonDz(id2_, index2);
+
 	  if( abs(id1_) == 13 ) ssmu1_ = muonId( index1 , NominalSSv5 ) ? 1 : 0;
 	  if( abs(id2_) == 13 ) ssmu2_ = muonId( index2 , NominalSSv5 ) ? 1 : 0;
 	}
@@ -1353,6 +1358,20 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 	  lep2_ = &hyp_ll_p4().at(hypIdx);
 	  id1_  = hyp_lt_id()[hypIdx];
 	  id2_  = hyp_ll_id()[hypIdx];
+	
+	  //save electron isolation
+	  if( abs(id1_) == 11 )	lep1iso_ = electronIsoValuePF2012_FastJetEffArea_v3(index1, 0.3, 0, useOldIsolation);
+	  if( abs(id2_) == 11 )	lep2iso_ = electronIsoValuePF2012_FastJetEffArea_v3(index2, 0.3, 0, useOldIsolation);
+
+	  //save muon isolation
+	  if( abs(id1_) == 13 )	lep1iso_ = muonIsoValuePF2012_deltaBeta(index1);
+	  if( abs(id2_) == 13 )	lep2iso_ = muonIsoValuePF2012_deltaBeta(index2);
+
+	  //save lepton Dz and D0
+	  lep1D0_ = leptonD0(id1_, index1);
+	  lep2D0_ = leptonD0(id2_, index2);
+	  lep1Dz_ = leptonDz(id1_, index1);
+	  lep2Dz_ = leptonDz(id2_, index2);
 
 	  if( abs(id1_) == 13 ) ssmu1_ = muonId( index1 , NominalSSv5 ) ? 1 : 0;
 	  if( abs(id2_) == 13 ) ssmu2_ = muonId( index2 , NominalSSv5 ) ? 1 : 0;	
@@ -2938,6 +2957,68 @@ float Z_looper::deltaPhi( float phi1 , float phi2){
 
 //--------------------------------------------------------------------
 
+float Z_looper::leptonD0(const int id, const int idx)
+{
+    const int vtxidx = firstGoodVertex();
+    if (vtxidx < 0)
+    {
+        std::cout << "[dy::leptonD0] WARNING - first good vertex index < 0.  Returning bogus value 999999" << std::endl;
+        return 999999.0;
+    }
+    if (abs(id)==13)
+    {
+        const int trkidx = tas::mus_trkidx().at(idx);
+        if (trkidx >= 0)
+        {
+            return trks_d0_pv(trkidx, vtxidx).first;
+        }
+    }
+    else if (abs(id)==11)
+    {
+        const int gsfidx = tas::els_gsftrkidx().at(idx);
+        if (gsfidx >= 0) 
+        {
+            return gsftrks_d0_pv(gsfidx, vtxidx).first;
+        }
+    }
+
+    // return bogus for non electon/muon
+    return -999999.0;
+}
+
+//--------------------------------------------------------------------
+
+float Z_looper::leptonDz(const int id, const int idx)
+{
+    const int vtxidx = firstGoodVertex();
+    if (vtxidx < 0)
+    {
+        std::cout << "[dy::leptonDz] WARNING - first good vertex index < 0.  Returning bogus value 999999" << std::endl;
+        return 999999.0;
+    }
+    if (abs(id)==13)
+    {
+        const int trkidx = tas::mus_trkidx().at(idx);
+        if (trkidx >= 0)
+        {
+            return trks_dz_pv(trkidx, vtxidx).first;
+        }
+    }
+    else if (abs(id)==11)
+    {
+        const int gsfidx = tas::els_gsftrkidx().at(idx);
+        if (gsfidx >= 0)
+        {
+            return gsftrks_dz_pv(gsfidx, vtxidx).first;
+        }
+    }
+
+    // return bogus for non electon/muon
+    return -999999.0;
+}
+
+//--------------------------------------------------------------------
+
 void Z_looper::fillUnderOverFlow(TH1F *h1, float value, float weight){
 
   float min = h1->GetXaxis()->GetXmin();
@@ -3189,6 +3270,13 @@ void Z_looper::InitBabyNtuple (){
   gentbar_      = 0;
   genttbar_     = 0;
 
+  lep1iso_		= -999.9;
+  lep2iso_		= -999.9;
+  lep1D0_		= -999.9;
+  lep2D0_		= -999.9;
+  lep1Dz_		= -999.9;
+  lep2Dz_		= -999.9;
+
   jet1mcfa_		= -1;
   jet2mcfa_		= -1;
   jet3mcfa_		= -1;
@@ -3439,8 +3527,8 @@ void Z_looper::MakeBabyNtuple (const char* babyFileName)
   babyTree_->Branch("pthat",        &pthat_,        "pthat/F"        );
   babyTree_->Branch("mllgen",       &mllgen_,       "mllgen/F"       );
   babyTree_->Branch("qscale",       &qscale_,       "qscale/F"       );
-  babyTree_->Branch("mg",           &mg_,           "mg/F"           );
-  babyTree_->Branch("ml",           &ml_,           "ml/F"           );
+  babyTree_->Branch("mg",           &mg_,           "mg/I"           );
+  babyTree_->Branch("ml",           &ml_,           "ml/I"           );
   babyTree_->Branch("x",            &x_,            "x/F"            );
   babyTree_->Branch("ptgen1",       &ptgen1_,       "ptgen1/F"       );
   babyTree_->Branch("ptgen2",       &ptgen2_,       "ptgen2/F"       );
@@ -3685,17 +3773,24 @@ void Z_looper::MakeBabyNtuple (const char* babyFileName)
   babyTree_->Branch("flaglt",                &flaglt_,                "flaglt/I");  
   babyTree_->Branch("isdata",                &isdata_,                "isdata/I");  
 
-  babyTree_->Branch("lljj",                 &lljj_,                 "lljj/F");  
-  babyTree_->Branch("jj"  ,                 &jj_  ,                 "jj/F"  );  
-  babyTree_->Branch("l1jj",                 &l1jj_,                 "l1jj/F");  
-  babyTree_->Branch("l2jj",                 &l2jj_,                 "l2jj/F");  
-  babyTree_->Branch("j1ll",                 &j1ll_,                 "j1ll/F");  
-  babyTree_->Branch("j2ll",                 &j2ll_,                 "j2ll/F");  
+  babyTree_->Branch("lljj",                  &lljj_,                  "lljj/F");  
+  babyTree_->Branch("jj"  ,                  &jj_  ,                  "jj/F"  );  
+  babyTree_->Branch("l1jj",                  &l1jj_,                  "l1jj/F");  
+  babyTree_->Branch("l2jj",                  &l2jj_,                  "l2jj/F");  
+  babyTree_->Branch("j1ll",                  &j1ll_,                  "j1ll/F");  
+  babyTree_->Branch("j2ll",                  &j2ll_,                  "j2ll/F");  
 
-  babyTree_->Branch("l1j1",                 &l1j1_,                 "l1j1/F");  
-  babyTree_->Branch("l2j2",                 &l2j2_,                 "l2j2/F");  
-  babyTree_->Branch("l1j2",                 &l1j2_,                 "l1j2/F");  
-  babyTree_->Branch("l2j1",                 &l2j1_,                 "l2j1/F");  
+  babyTree_->Branch("l1j1",                  &l1j1_,                  "l1j1/F");  
+  babyTree_->Branch("l2j2",                  &l2j2_,                  "l2j2/F");  
+  babyTree_->Branch("l1j2",                  &l1j2_,                  "l1j2/F");  
+  babyTree_->Branch("l2j1",                  &l2j1_,                  "l2j1/F");  
+
+  babyTree_->Branch("lep1iso" ,              &lep1iso_,               "lep1iso/F");  
+  babyTree_->Branch("lep2iso" ,              &lep2iso_,               "lep2iso/F");  
+  babyTree_->Branch("lep1D0" ,               &lep1D0_,                "lep1D0/F");  
+  babyTree_->Branch("lep2D0" ,               &lep2D0_,                "lep2D0/F");  
+  babyTree_->Branch("lep1Dz" ,               &lep1Dz_,                "lep1Dz/F");  
+  babyTree_->Branch("lep2Dz" ,               &lep2Dz_,                "lep2Dz/F");  
 
   babyTree_->Branch("dilep"   , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &dilep_	);
   babyTree_->Branch("dileppf" , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &dileppf_	);
@@ -3710,10 +3805,10 @@ void Z_looper::MakeBabyNtuple (const char* babyFileName)
   babyTree_->Branch("pflep1"  , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &pflep1_	);
   babyTree_->Branch("pflep2"  , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &pflep2_	);
 
-  babyTree_->Branch("genlep1"    , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genlep1_	);
-  babyTree_->Branch("genlep2"    , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genlep2_	);
-  babyTree_->Branch("gennu1"    , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &gennu1_	);
-  babyTree_->Branch("gennu2"    , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &gennu2_	);
+  babyTree_->Branch("genlep1" , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genlep1_	);
+  babyTree_->Branch("genlep2" , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &genlep2_	);
+  babyTree_->Branch("gennu1"  , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &gennu1_	);
+  babyTree_->Branch("gennu2"  , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &gennu2_	);
 
   babyTree_->Branch("pfTau_leadPtcand"  , "ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >", &pfTau_leadPtcand_	);
   babyTree_->Branch("pfTau_leadPtcandID",        &pfTau_leadPtcandID_,        "pfTau_leadPtcandID/I");
