@@ -70,7 +70,9 @@ class Z_looper
 
   VofP4 pujets_;
   VofP4 pt40jets_;
-  VofP4 pt40csvs_;
+  std::vector <Float_t> pt40csvs_;
+  std::vector <Float_t> pt40mcfas_;
+  std::vector <Float_t> pt40mcfps_;
 
   Int_t npujets_;
 

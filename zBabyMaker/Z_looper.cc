@@ -550,8 +550,12 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
   //char* mcJEC   = "DESIGN42_V17";
 
   // new 52X
-  string dataJEC = "GR_R_52_V9";
-  string mcJEC   = "START52_V9B";
+  // string dataJEC = "GR_R_52_V9";
+  // string mcJEC   = "START52_V9B";
+
+  // use for ETH pt40 jets
+  string dataJEC = FT_53_V6_AN3;
+  string mcJEC = FT_53_V6_AN3;
 
   if ( isData ) {
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_AK5PF_L1FastJet.txt"    , dataJEC ));
@@ -2258,6 +2262,12 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		  if( fabs( vjet.eta() ) > 3.0 ) continue;
 
 		  if ( vjet.pt()   > 40. ){
+
+			pt40jets_.push_back(vjet);
+		    pt40mcfas_.push_back( pfjets_mcflavorAlgo().at(ijet) );
+			pt40mcfps_.push_back( pfjets_mcflavorPhys().at(ijet) );
+			pt40csvs_.push_back(  pfjets_combinedSecondaryVertexBJetTag().at(ijet) );
+
 			nJets40_++;
 			ht40_ += vjet.pt();
 		  }
@@ -3036,6 +3046,11 @@ void Z_looper::fillUnderOverFlow(TH1F *h1, float value, float weight){
 void Z_looper::InitBabyNtuple (){
 
   pujets_.clear();
+  pt40jets_.clear();
+  pt40csvs_.clear();
+
+  pt40mcfas_.clear();
+  pt40mcfps_.clear();
 
   jet1flav_     = -9999;
   jet2flav_     = -9999;
@@ -3879,6 +3894,11 @@ void Z_looper::MakeBabyNtuple (const char* babyFileName)
   babyTree_->Branch("extrag"    ,  &extrag_    ,  "extrag/I"    );  
 
   babyTree_->Branch("pujets"    , "std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > >", &pujets_ );
+  babyTree_->Branch("pt40jets"  , "std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > >", &pt40jets_ );
+
+  babyTree_->Branch("pt40csvs"  , "std::vector< Float_t >", &pt40csvs_ );
+  babyTree_->Branch("pt40mcfas" , "std::vector< Float_t >", &pt40mcfas_ );
+  babyTree_->Branch("pt40mcfps" , "std::vector< Float_t >", &pt40mcfps_ );
   babyTree_->Branch("npujets"   ,  &npujets_   ,  "npujets/I"   );
 }
 
