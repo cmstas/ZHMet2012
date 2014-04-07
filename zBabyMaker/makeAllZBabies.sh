@@ -2,7 +2,7 @@
 
 . makeZBaby.sh
 
-versionnumber="V00-02-24"
+versionnumber="V00-02-25"
 
 make -j5
 if [ ! "$?" -eq "0" ]; then
