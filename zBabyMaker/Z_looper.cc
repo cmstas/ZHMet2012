@@ -554,8 +554,8 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
   // string mcJEC   = "START52_V9B";
 
   // use for ETH pt40 jets
-  string dataJEC = FT_53_V6_AN3;
-  string mcJEC = FT_53_V6_AN3;
+  string dataJEC = "FT_53_V6_AN3";
+  string mcJEC = "FT_53_V6_AN3";
 
   if ( isData ) {
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  (Form("jetCorrections/%s_AK5PF_L1FastJet.txt"    , dataJEC ));
@@ -1011,8 +1011,8 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		  }
 
 		  else if( TString(prefix).Contains("wzsms") ){
-			mg_ = cms2.sparm_values().at(0);
-			ml_ = cms2.sparm_values().at(1);
+			mg_ = (int)cms2.sparm_values().at(0);
+			ml_ = (int)cms2.sparm_values().at(1);
 			x_  = -999.;
 
 			int   mgbin = xsec_C1N2->FindBin(mg_);
@@ -1032,8 +1032,8 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 
 			mg_ = -1;//sparm_mN();
 			ml_ = -1;//sparm_mL();
-			mg_     = cms2.sparm_values().at(0);
-			ml_     = cms2.sparm_values().at(1);
+			mg_     = (int)cms2.sparm_values().at(0);
+			ml_     = (int)cms2.sparm_values().at(1);
 			weight_ = 0.5 * lumi * getZHGMSBCrossSection( mg_ ) * (1000.0) / nsigEvtsHist_ -> GetBinContent( nsigEvtsHist_ -> FindBin( mg_, ml_ ) ); // /nevts);
 			x_  = -999;
 
@@ -1041,7 +1041,7 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 
 		  else if( TString(prefix).Contains("gmsb") ){
 
-			mg_     = cms2.sparm_values().at(0);
+			mg_     = (int)cms2.sparm_values().at(0);
 			weight_ = lumi * getGMSBCrossSection( mg_ ) * (1000.0 / 300000.0);
 
 			ml_ = -999;
@@ -2264,9 +2264,12 @@ void Z_looper::ScanChain (TChain* chain, const char* prefix, bool isData,
 		  if ( vjet.pt()   > 40. ){
 
 			pt40jets_.push_back(vjet);
-		    pt40mcfas_.push_back( pfjets_mcflavorAlgo().at(ijet) );
-			pt40mcfps_.push_back( pfjets_mcflavorPhys().at(ijet) );
 			pt40csvs_.push_back(  pfjets_combinedSecondaryVertexBJetTag().at(ijet) );
+
+			if( !cms2.evt_isRealData() ){
+			  pt40mcfas_.push_back( pfjets_mcflavorAlgo().at(ijet) );
+			  pt40mcfps_.push_back( pfjets_mcflavorPhys().at(ijet) );
+			}
 
 			nJets40_++;
 			ht40_ += vjet.pt();
