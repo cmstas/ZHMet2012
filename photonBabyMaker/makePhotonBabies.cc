@@ -298,8 +298,11 @@ void makePhotonBabies::ScanChain (TChain* chain, const char* prefix, bool isData
   //char* mcJEC   = "DESIGN42_V17";
 
   // new 52X
-  string dataJEC = "GR_R_52_V9";
+  // string dataJEC = "GR_R_52_V9";
   string mcJEC   = "START52_V9B";
+
+  // new for edge
+  string dataJEC = "FT_53_V6_AN3";
 
   if ( TString(prefix).Contains("data") ) {
     // jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/GR_R_42_V23_AK5PF_L1FastJet.txt");

@@ -63,7 +63,13 @@ void doAllPhotonBabies( string prefix, string ntuplenumber, bool isData, float k
 
   if( prefix == "data_53X_2012A" ){    
     pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012A-13Jul2012-v1_AOD/merged/merged_ntuple_%s.root", percentage.c_str() ) );
-    pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012A-recover-06Aug2012-v1_AOD/merged/merged_ntuple_%s.root", percentage.c_str() ) );
+    // pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012A-recover-06Aug2012-v1_AOD/merged/merged_ntuple_%s.root", percentage.c_str() ) );
+  }
+
+  //-----------------------------------------------------------------------------------
+
+  else if( prefix == "data_53X_2012A_recover_06Aug2012" ){
+	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012A-recover-06Aug2012-v1_AOD/merged/merged*.root");
   }
 
   //-----------------------------------------------------------------------------------
@@ -75,14 +81,32 @@ void doAllPhotonBabies( string prefix, string ntuplenumber, bool isData, float k
   //-----------------------------------------------------------------------------------
 
   else if( prefix == "data_53X_2012C" ){    
-    pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-24Aug2012-v1_AOD/merged/merged_ntuple_%s.root", percentage.c_str() ));
+    // pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-24Aug2012-v1_AOD/merged/merged_ntuple_%s.root", percentage.c_str() ));
     pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-PromptReco-v2_AOD/merged/merged_ntuple_%s.root", percentage.c_str() ));
   }
 
   //-----------------------------------------------------------------------------------
 
+  else if( prefix == "data_53X_2012C_24Aug2012" ){    
+	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-24Aug2012-v1_AOD/merged/merged*root");
+  }
+
+  //-----------------------------------------------------------------------------------
+
+  else if( prefix == "data_53X_2012C_ecalreco" ){    
+	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012C-EcalRecover_11Dec2012-v1_AOD/merged/merged*root");
+  }
+
+  //-----------------------------------------------------------------------------------
+
+  else if( prefix == "data_53X_2012D_16Jan2013" ){    
+	pickSkimIfExists(ch,"/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012D-16Jan2013-v1_AOD/merged/merged*root");
+  }
+
+  //-----------------------------------------------------------------------------------
+
   else if( prefix == "data_53X_2012D" ){    
-    pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012D-16Jan2013-v1_AOD/merged/merged_ntuple_%s.root", percentage.c_str() ));
+    // pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012D-16Jan2013-v1_AOD/merged/merged_ntuple_%s.root", percentage.c_str() ));
     pickSkimIfExists(ch,Form( "/hadoop/cms/store/group/snt/papers2012/Data2012/CMSSW_5_3_2_patch4_V05-03-24/DoubleElectron_Run2012D-PromptReco-v1_AOD/merged/merged_ntuple_%s.root", percentage.c_str() ));
   }
 
